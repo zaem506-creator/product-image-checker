@@ -1,0 +1,23 @@
+{
+  "name": "product-image-agent",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx --env-file-if-exists=.env src/server.ts",
+    "eval": "tsx --env-file-if-exists=.env src/eval.ts",
+    "learn": "tsx src/learn.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=22.9"
+  }
+}
