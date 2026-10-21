@@ -177,6 +177,9 @@ textarea:focus{outline:2px solid var(--yellow);border-color:var(--yellowd)}
 .fbf label{font-size:12px;display:flex;gap:6px;align-items:center;font-weight:400}
 .fbf select,.fbf input[type=text]{border:1px solid var(--line);border-radius:6px;padding:4px 6px;font:inherit;font-size:12px}
 .fbf .row{margin-top:4px;gap:6px}
+.kin{flex:1;min-width:200px;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font:inherit;font-size:13.5px;direction:ltr;background:#fffdf8;color:var(--text)}
+.kin:focus{outline:2px solid var(--yellow);border-color:var(--yellowd)}
+label.rem{display:flex;gap:6px;align-items:center;font-size:12.5px;margin-top:8px;cursor:pointer}
 </style>
 </head>
 <body>
@@ -238,6 +241,16 @@ textarea:focus{outline:2px solid var(--yellow);border-color:var(--yellowd)}
   <div class="row" style="margin-top:6px"><button class="mini" id="clear" type="button" data-i="clear"></button></div>
 </div>
 
+<div class="card" id="aiCard">
+  <span class="lbl"><span class="step">🤖</span><span data-i="aiCardT"></span></span>
+  <div class="row" style="margin-top:0"><input type="password" id="aiKey" class="kin" placeholder="sk-ant-..." autocomplete="off" spellcheck="false"><button class="mini" id="aiKeySave" type="button" data-i="aiKeySave"></button></div>
+  <label class="rem"><input type="checkbox" id="aiKeyRem"> <span data-i="aiKeyRem"></span></label>
+  <div class="help" id="aiKeyStat" style="font-weight:700"></div>
+  <div class="help" data-i="aiKeyHelp"></div>
+  <div class="help" id="aiLearn"></div>
+  <div class="row"><button class="mini" id="aiExp" type="button" data-i="aiExp"></button><label class="mini" style="cursor:pointer"><input type="file" id="aiImpF" accept=".json,application/json" hidden><span data-i="aiImp"></span></label><button class="mini" id="aiClr" type="button" data-i="aiClr"></button></div>
+</div>
+
 <div class="card" id="out" hidden>
   <span class="lbl"><span class="step">2</span><span data-i="l2"></span></span>
   <div id="verdict"></div>
@@ -286,6 +299,11 @@ var I={
   wModeAdd:"➕ إضافة", wModeRm:"➖ إزالة", wUndo:"تراجع", wReset:"إعادة", wDl:"تنزيل", wBusy:"جاري القص…", wFail:"ما قدرت أفتح الصورة", wStat:"{n} من {t} جاهزة", wLoadFail:"ما قدرت أحمّل أداة القص (تحتاج إنترنت أول مرة)", wNone:"حط رابط أو ارفع صورة",
   ai:"🤖 افحص بالإيجنت", aiStat:"الإيجنت: {n} من {t}", aiNA:"الإيجنت مو شغّال. شغّل السيرفر (npm start في مجلد agent) وافتح الأداة من http://localhost:8787", aiTag:"الإيجنت", aiBusy:"🤖 الإيجنت يفحص…", aiErr:"🤖 الإيجنت ما قدر يفحصها: ", aiTool:"الأداة كانت: ",
   fbQ:"قرار الإيجنت صح؟", fbOk:"✓ صح", fbNo:"✕ غلط", fbSave:"حفظ", fbCancel:"إلغاء", fbWhy:"ليش؟ (اختياري — يساعده يتعلم)", fbSaved:"✓ انحفظ — الإيجنت بيتعلم منه", fbFail:"ما قدرت أحفظ التصحيح — تأكد إن السيرفر شغّال", fbWait:"تقدر تصحّح بعد ما يخلص الفحص", fbRight:"القرار الصحيح:",
+  aiCardT:"الإيجنت — مفتاح Claude", aiKeySave:"حفظ المفتاح", aiKeyRem:"تذكّر المفتاح في هذا المتصفح (لا تختاره في جهاز مشترك)", aiKeyOk:"✓ المفتاح محفوظ — الإيجنت جاهز", aiKeyNone:"حط مفتاح Claude (يبدأ بـ sk-ant-) عشان يشتغل الإيجنت",
+  aiKeyHelp:"المفتاح يبقى في متصفحك بس، وما ينحفظ داخل الملف. الصور اللي يفحصها الإيجنت تنرسل لـ Claude (Anthropic).",
+  aiLearnT:"تعلّم من {n} مثال · دقته في الصور اللي صحّحتها: {a} (من {m} صورة)", aiMany:"الأمثلة كثيرة — كل فحص صار أبطأ وأغلى", aiExp:"تصدير الأمثلة", aiImp:"استيراد أمثلة", aiClr:"مسح الأمثلة والتصحيحات",
+  aiClrQ:"أكيد تبي تمسح كل الأمثلة والتصحيحات؟ الإيجنت بينسى كل اللي تعلمه.", aiImpOk:"انضاف {n} مثال", aiImpBad:"الملف مو ملف أمثلة الإيجنت", aiNoEx:"ما فيه أمثلة للحين — صحّح أغلاط الإيجنت وتنضاف لحالها",
+  aiKeyBad:"المفتاح غلط أو ما له صلاحية — تأكد منه في console.anthropic.com", aiNet:"ما قدرت أوصل لـ Claude — يمكن الشبكة حاجبة api.anthropic.com", aiRefused:"الإيجنت ما قدر يحكم على هذي الصورة — شيّك عليها بعينك",
   xls:"تنزيل Excel", vBad:"المخالفة ({n})", vAll:"الكل ({n})", noBad:"ما فيه صور مخالفة — كل الصور سليمة ✓", sum:"{b} مرفوض · {r} يحتاج مراجعة · {o} مطابق", stOk:"مطابق", stBad:"مرفوض", stRev:"يحتاج مراجعة",
   go:"افحص", clear:"مسح", l2:"النتيجة", busy:"جاري الفحص…", noLinks:"حط رابط صورة أو ارفع صورة واحدة على الأقل", dropT:"أو ارفع صور من جهازك — اسحبها هنا أو اضغط للاختيار", dropS:"تقدر تختار أكثر من صورة مرة وحدة (JPG · PNG · WEBP) — وتقدر تخلطها مع الروابط", files:"{n} صورة مختارة", filesClr:"✕ شيل الصور",
   ok:"مطابق ✓", bad:"غير مطابق ✕", part:"ما قدرت أفحص كل شي", rev:"يحتاج مراجعة",
@@ -314,6 +332,11 @@ var I={
   wModeAdd:"➕ Add", wModeRm:"➖ Remove", wUndo:"Undo", wReset:"Reset", wDl:"Download", wBusy:"Cutting…", wFail:"Couldn't open the image", wStat:"{n} of {t} ready", wLoadFail:"Couldn't load the cut-out tool (needs internet the first time)", wNone:"Add a link or upload an image",
   ai:"🤖 Check with the agent", aiStat:"Agent: {n} of {t}", aiNA:"The agent isn't running. Start the server (npm start in the agent folder) and open the tool from http://localhost:8787", aiTag:"Agent", aiBusy:"🤖 The agent is checking…", aiErr:"🤖 The agent couldn't check it: ", aiTool:"The tool said: ",
   fbQ:"Is the agent right?", fbOk:"✓ Right", fbNo:"✕ Wrong", fbSave:"Save", fbCancel:"Cancel", fbWhy:"Why? (optional — helps it learn)", fbSaved:"✓ Saved — the agent will learn from it", fbFail:"Couldn't save the correction — check that the server is running", fbWait:"You can correct it once the check has finished", fbRight:"The right decision:",
+  aiCardT:"The agent — Claude key", aiKeySave:"Save key", aiKeyRem:"Remember the key in this browser (not on a shared computer)", aiKeyOk:"✓ Key saved — the agent is ready", aiKeyNone:"Add a Claude key (starts with sk-ant-) for the agent to work",
+  aiKeyHelp:"The key stays in your browser only and is never saved in the file. Images the agent checks are sent to Claude (Anthropic).",
+  aiLearnT:"Learnt from {n} example(s) · accuracy on the images you corrected: {a} (of {m})", aiMany:"Many examples make every check slower and dearer", aiExp:"Export examples", aiImp:"Import examples", aiClr:"Clear examples and corrections",
+  aiClrQ:"Clear all examples and corrections? The agent forgets everything it has learnt.", aiImpOk:"{n} example(s) added", aiImpBad:"This is not an agent examples file", aiNoEx:"No examples yet — correct the agent's mistakes and they are added automatically",
+  aiKeyBad:"The key is wrong or has no access — check it at console.anthropic.com", aiNet:"Couldn't reach Claude — the network may be blocking api.anthropic.com", aiRefused:"The agent couldn't judge this image — check it by eye",
   xls:"Download Excel", vBad:"With issues ({n})", vAll:"All ({n})", noBad:"No images with issues — all images are clean ✓", sum:"{b} rejected · {r} need review · {o} approved", stOk:"Approved", stBad:"Rejected", stRev:"Needs review",
   go:"Check", clear:"Clear", l2:"Result", busy:"Checking…", noLinks:"Add at least one image link or upload an image", dropT:"Or upload images from your device — drop them here or click to choose", dropS:"You can pick several at once (JPG · PNG · WEBP) — and mix them with links", files:"{n} image(s) chosen", filesClr:"✕ Remove images",
   ok:"Approved ✓", bad:"Needs fixing ✕", part:"Couldn't check everything", rev:"Needs review",
@@ -896,15 +919,123 @@ $("#xls").onclick=function(){
   document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000);
 };
 /* ===================== Agent =====================
-   Each image goes to the local server (agent/), which asks Claude to judge it by the team's rules and examples and
-   answers with the verdict. "✓ Right / ✕ Wrong" under a verdict saves the team's decision there; `npm run learn`
-   turns the corrected ones into examples the agent learns from */
-var AI_BASE=/^https?:$/.test(location.protocol)?"":"http://localhost:8787",AIBUSY=false;
+   Claude judges each image by the team's rules and by the team's own past decisions (examples). Two ways to run it:
+   - straight from this page: the user's API key is kept in this browser only, and the examples and corrections live in
+     this browser's storage (export/import shares them with the team);
+   - through the local server in agent/ (npm start), when this page is opened from it: the key stays on the server.
+   The rules below are the same text as agent/src/rules.ts — change both together */
+var AI_RULES="You are the image auditor for an online grocery and retail catalogue. Each request shows you one product image; you decide whether it meets the catalogue's photo standard, exactly as the human audit team would.\n\nPossible verdicts:\n- \"approved\": the image meets every rule below.\n- \"rejected\": the image clearly breaks at least one rule. List every rule it breaks.\n- \"review\": only when the image sits right on the line of a rule and an experienced auditor could go either way. Do not use it to avoid a decision you can make; a wrong \"review\" costs the team time, a wrong \"approved\" or \"rejected\" costs a product listing.\n\nThe rules, each with the reason code you report:\n\nbg (Background)\n- The background must be pure white. Grey, cream, coloured, gradient, textured, a room or a scene: rejected.\n- Text, arrows, callouts, badges, logos, icons, extra panels or a watermark placed on the background around the product: rejected under bg. Text and logos printed on the product's own packaging are fine.\n- A transparent background on a PNG is shown to you flattened on white; the measurements say when the original had transparency.\n- You cannot judge exact grey levels by eye. Use the measured border colours: every side #F8F8F8 or lighter is white; sides at #F3F3F3 or darker are grey; #F4–#F7 is off-white and goes to \"review\" unless something else already rejects the image.\n\nshadow (Over shadow)\n- A soft, light contact shadow under or beside the product is fine.\n- A heavy, dark or large shadow spreading over the background: rejected.\n\nzoomout (Zoom out)\n- The product must fill at least 60% of the image along its longer side (width or height, whichever it fills more). Smaller: rejected.\n\nzoomin (Zoom In)\n- The product must be shown whole. If it is cut off by the image edges (on three or four sides, or clearly missing a part), rejected. Touching one or two edges without losing any part is fine.\n\ncenter (Not Centered)\n- The product's horizontal centre must be within 15% of the image width from the image's centre. Further: rejected. Vertical position is not judged.\n- An image that is rotated sideways or upside down (the product or its text reads sideways or upside down) is reported under center. A slight tilt that is part of the product shot is fine.\n\nhuman (Human parts)\n- No real human hand, fingers, arm, face or body in the image, even partly or at the edge.\n- A hand, face or person printed as artwork on the packaging is fine. Animal faces and cartoon figures on the packaging are fine. Mannequins showing clothing are not people.\n\nres (Resolution)\n- The image must be sharp: the product's edges and the text on the pack must be crisp and readable at normal viewing size. Blurry, out of focus, pixelated (visible blocks), heavy compression artefacts, or clearly enlarged from a small picture: rejected.\n- Small text that is simply tiny on the pack is fine if the large text and edges are crisp.\n\nreflect (Reflections)\n- No strong glare, flash hotspot or mirror reflection on the product that hides its label or details. Normal studio highlights on glossy packaging are fine.\n\nHow to work:\n1. Look at the whole image first, then check every rule in order. Count a reason only when you can point to it in the image.\n2. Use the measurements as facts about pixels (sizes, border colours, the outline of non-white pixels). The outline can be stretched by a shadow, text on the background or a hand, so compare it with what you see before you rely on it for zoomout, zoomin or center.\n3. The examples before the image are real decisions by the audit team. They show where the team draws each line; follow them when a case is similar.\n4. Write \"note\" in Arabic (Gulf dialect, short, plain words): what is wrong and what to fix, or that the image is fine. Write each reason's \"detail\" in Arabic as well, one short sentence naming what you saw.";
+var AI_MODEL="claude-opus-5-5",AI_API="https://api.anthropic.com/v1/messages",AIBUSY=false,AI_SERVER=null;
 var AI_CODES=["bg","shadow","center","zoomin","zoomout","human","res","reflect"],
   AI_SHORT={bg:"Background",shadow:"Over shadow",center:"Not Centered",zoomin:"Zoom In",zoomout:"Zoom out",human:"Human parts",res:"Resolution",reflect:"Reflections"};
+var AI_SCHEMA={type:"object",properties:{status:{type:"string",enum:["approved","rejected","review"]},
+  reasons:{type:"array",items:{type:"object",properties:{code:{type:"string",enum:AI_CODES},detail:{type:"string"}},required:["code","detail"],additionalProperties:false}},
+  note:{type:"string"}},required:["status","reasons","note"],additionalProperties:false};
 function stLabel(st){var D=L();return st==="bad"||st==="rejected"?D.stBad:st==="rev"||st==="review"?D.stRev:D.stOk}
 function blobData(u){return fetch(u).then(function(r){return r.blob()}).then(function(b){return new Promise(function(res,rej){var fr=new FileReader();fr.onload=function(){res(fr.result)};fr.onerror=rej;fr.readAsDataURL(b)})})}
 function imgBody(p,i){var r=p.rows[i];return r.file?blobData(r.u).then(function(d){return {data:d,key:r.raw}}):Promise.resolve({url:r.u,key:r.u})}
+/* the local server answers only when this page was opened from it (or one runs on this computer) */
+async function aiServer(){
+  if(AI_SERVER===null){try{var r=await fetch(SRV()+"/api/health",{signal:AbortSignal.timeout(1500)});AI_SERVER=r.ok&&!!(await r.json()).ok}catch(e){AI_SERVER=false}}
+  return AI_SERVER}
+function SRV(){return /^https?:$/.test(location.protocol)?"":"http://localhost:8787"}
+
+/* ----- the key: in this browser only (this tab, or remembered when the user asks) ----- */
+function aiKey(){try{return sessionStorage.getItem("hsmqc_key")||localStorage.getItem("hsmqc_key")||""}catch(e){return ""}}
+function aiSetKey(k,rem){try{sessionStorage.removeItem("hsmqc_key");localStorage.removeItem("hsmqc_key");if(k)(rem?localStorage:sessionStorage).setItem("hsmqc_key",k)}catch(e){}}
+
+/* ----- examples and corrections: IndexedDB of this browser ----- */
+var IDB=null;
+function db(){if(!IDB)IDB=new Promise(function(res,rej){var q=indexedDB.open("hsmqc-agent",1);
+  q.onupgradeneeded=function(){var d=q.result;d.createObjectStore("examples",{keyPath:"key"});d.createObjectStore("feedback",{keyPath:"key"})};
+  q.onsuccess=function(){res(q.result)};q.onerror=function(){IDB=null;rej(q.error)}});return IDB}
+function dbDo(store,mode,f){return db().then(function(d){return new Promise(function(res,rej){var t=d.transaction(store,mode),s=t.objectStore(store),out=f(s);
+  t.oncomplete=function(){res(out&&"result" in out?out.result:undefined)};t.onerror=function(){rej(t.error)}})})}
+function dbAll(store){return dbDo(store,"readonly",function(s){return s.getAll()})}
+function dbPut(store,v){return dbDo(store,"readwrite",function(s){s.put(v)})}
+var EXBLOCKS=null;   /* the examples as request content, rebuilt when they change */
+
+/* ----- what the model can't judge by eye: exact border colours, transparency, the outline of non-white pixels ----- */
+function aiMeasure(c){
+  var W=c.width,H=c.height,d=c.getContext("2d").getImageData(0,0,W,H).data,band=Math.max(3,Math.round(Math.min(W,H)*0.02));
+  var sides=[[],[],[],[]],rows=new Uint32Array(H),cols=new Uint32Array(W),x,y;
+  for(y=0;y<H;y++)for(x=0;x<W;x++){var i=(y*W+x)*4,r=d[i],g=d[i+1],b=d[i+2],sd=y<band?0:y>=H-band?1:x<band?2:x>=W-band?3:-1;
+    if(sd>=0)sides[sd].push((r+g+b)/3); if(!isWhite(r,g,b)){rows[y]++;cols[x]++}}
+  var med=function(a){a.sort(function(p,q){return p-q});return a[a.length>>1]};
+  var tr=Math.max(1,W*0.004),tc=Math.max(1,H*0.004),y0=-1,y1=-1,x0=-1,x1=-1;
+  for(y=0;y<H;y++)if(rows[y]>tr){if(y0<0)y0=y;y1=y}
+  for(x=0;x<W;x++)if(cols[x]>tc){if(x0<0)x0=x;x1=x}
+  return {border:sides.map(function(s){return hexOf(med(s))}),outline:y0<0||x0<0?null:{fill:Math.max((x1-x0+1)/W,(y1-y0+1)/H),off:Math.abs((x0+x1)/2-(W-1)/2)/W,
+    touch:(x0<=1?1:0)+(y0<=1?1:0)+(x1>=W-2?1:0)+(y1>=H-2?1:0)}};
+}
+function jpegOf(img,max,w,h,q){return canvasOf(img,max,w,h).toDataURL("image/jpeg",q).split(",")[1]}
+async function aiPrep(blob){
+  var img=await decode(blob),w=img.width||img.naturalWidth,h=img.height||img.naturalHeight;
+  if(!w||!h)throw new Error("img");
+  var s=Math.min(1,400/Math.max(w,h)),t=document.createElement("canvas");t.width=Math.max(1,Math.round(w*s));t.height=Math.max(1,Math.round(h*s));
+  var tx=t.getContext("2d",{willReadFrequently:true});tx.drawImage(img,0,0,t.width,t.height);
+  var a=tx.getImageData(0,0,t.width,t.height).data,transp=false;for(var i=3;i<a.length;i+=4)if(a[i]<250){transp=true;break}
+  var m=aiMeasure(canvasOf(img,800,w,h)),o=m.outline,pc=function(v){return Math.round(v*100)+"%"};
+  var desc=["Original size: "+w+"×"+h+" px.","Transparent background in the original: "+(transp?"yes":"no")+".",
+    "Measured border colours (median of each side's outer 2%): top "+m.border[0]+", bottom "+m.border[1]+", left "+m.border[2]+", right "+m.border[3]+".",
+    o?"Outline of non-white pixels: fills "+pc(o.fill)+" along its longer side; its horizontal centre is "+pc(o.off)+" of the width from the image centre; touches "+o.touch+" of 4 edges."
+     :"Outline of non-white pixels: none found (the image is almost all white, or the background is not white)."].join("\n");
+  /* the image to judge at the model's full detail; a lighter copy is kept in case it becomes an example */
+  var out={jpeg:jpegOf(img,1568,w,h,0.92),small:jpegOf(img,768,w,h,0.85),w:w,h:h,desc:desc};
+  if(img.close)try{img.close()}catch(e){}
+  return out;
+}
+async function aiBlob(p,i){var r=p.rows[i];
+  if(r.file)return await (await fetch(r.u)).blob();
+  var src=sources(r.u),er=null,sig=new AbortController().signal;
+  for(var k=0;k<src.length;k++){try{return await getBlob(src[k],sig)}catch(e){er=e}}
+  throw er||new Error("fail");
+}
+async function aiExamples(){
+  if(!EXBLOCKS){var ex=await dbAll("examples"),out=[];ex.sort(function(a,b){return a.at<b.at?-1:1});
+    ex.forEach(function(e,n){out.push({type:"text",text:"Example "+(n+1)+" — the audit team's decision: "+e.status+(e.status!=="approved"&&e.reasons.length?" — "+e.reasons.join(", "):"")+"."+(e.why?" Why: "+e.why:"")+"\n"+e.desc},
+      {type:"image",source:{type:"base64",media_type:"image/jpeg",data:e.small}})});
+    if(out.length)out.unshift({type:"text",text:ex.length+" examples of the audit team's past decisions:"});
+    EXBLOCKS=out}
+  return EXBLOCKS}
+function aiErr(code,msg){var e=new Error(msg);e.code=code;return e}
+async function aiAsk(prep){
+  var content=(await aiExamples()).map(function(b){return Object.assign({},b)});
+  /* the cache ends after the last example: rules and examples are the same on every call */
+  if(content.length)content[content.length-1].cache_control={type:"ephemeral",ttl:"1h"};
+  content.push({type:"text",text:"The image to audit:"},{type:"image",source:{type:"base64",media_type:"image/jpeg",data:prep.jpeg}},
+    {type:"text",text:"Measurements of this image:\n"+prep.desc+"\n\nAudit it against every rule and give your verdict."});
+  var body=JSON.stringify({model:AI_MODEL,max_tokens:16000,fallbacks:"default",output_config:{effort:"high",format:{type:"json_schema",schema:AI_SCHEMA}},
+    system:[{type:"text",text:AI_RULES,cache_control:{type:"ephemeral",ttl:"1h"}}],messages:[{role:"user",content:content}]});
+  for(var a=0;;a++){
+    var r;
+    try{r=await fetch(AI_API,{method:"POST",body:body,headers:{"content-type":"application/json","x-api-key":aiKey(),"anthropic-version":"2023-06-01",
+      "anthropic-beta":"server-side-fallback-2026-07-01","anthropic-dangerous-direct-browser-access":"true"}})}
+    catch(e){if(a<2){await wait(2000*(a+1));continue}throw aiErr("net",L().aiNet)}
+    if(r.status===401||r.status===403)throw aiErr("key",L().aiKeyBad);
+    /* busy or rate-limited: wait as told and try again */
+    if((r.status===429||r.status>=500)&&a<4){await wait(Math.min(60,+(r.headers.get("retry-after")||0)||5*(a+1))*1000);continue}
+    var j=await r.json().catch(function(){return {}});
+    if(!r.ok)throw aiErr("api",(j.error&&j.error.message||("HTTP "+r.status)).slice(0,160));
+    if(j.stop_reason==="refusal")return {status:"review",reasons:[],note:L().aiRefused};
+    var tb=(j.content||[]).filter(function(b){return b.type==="text"}).pop();
+    try{return JSON.parse(tb.text)}catch(e){return {status:"review",reasons:[],note:L().aiRefused}}
+  }
+}
+async function aiDirect(p,i){
+  var im=p.imgs[i],blob,prep;
+  try{blob=await aiBlob(p,i);prep=await aiPrep(blob)}
+  catch(e){var no=e&&(e.img||e.http===401||e.http===403);
+    return {status:"rejected",reasons:[{code:no?"noopen":"invalid",label:STD[no?"noopen":"invalid"],detail:e&&e.http?"HTTP "+e.http:""}],note:L().R[no?"noopen":"fail"].replace("{a}","")}}
+  var v=await aiAsk(prep),seen={};
+  var rs=(v.reasons||[]).filter(function(r){if(seen[r.code]||AI_CODES.indexOf(r.code)<0)return false;seen[r.code]=1;return true});
+  if(v.status==="approved")rs=[];
+  if(v.status==="rejected"&&!rs.length)v.status="review";
+  im.aiPrep={small:prep.small,desc:prep.desc};
+  return {status:v.status,reasons:rs.map(function(r){return {code:r.code,label:STD[r.code],detail:r.detail}}),note:v.note||"",width:prep.w,height:prep.h};
+}
+
+/* ----- the card's agent part: verdict, and "right / wrong" to teach it ----- */
 function aiBlock(im,i){var D=L();
   if(im.aiBusy)return '<div class="aib">'+esc(D.aiBusy)+'</div>';
   if(im.aiErr)return '<div class="aib bad">'+esc(D.aiErr+im.aiErr)+'</div>';
@@ -921,10 +1052,20 @@ function aiBlock(im,i){var D=L();
   else if(im.fb!=="busy")h+='<div class="fb">'+esc(D.fbQ)+(im.ai.status!=="review"?' <button type="button" data-fb="ok" data-i="'+i+'">'+esc(D.fbOk)+'</button>':"")+'<button type="button" data-fb="no" data-i="'+i+'">'+esc(D.fbNo)+'</button></div>';
   return h+'</div>';
 }
-function sendFb(i,human){var p=LAST,im=p.imgs[i];im.fbOpen=false;im.fb="busy";show();
-  imgBody(p,i).then(function(b){b.agent={status:im.ai.status,reasons:im.ai.reasons};b.human=human;
-    return fetch(AI_BASE+"/api/feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)})})
-  .then(function(x){if(!x.ok)throw new Error("HTTP "+x.status);im.fb="saved";show()},function(){im.fb="";alert(L().fbFail);show()})}
+/* a correction: on the server it goes to data/feedback.jsonl (npm run learn); here a wrong verdict becomes an example at once */
+async function sendFb(i,human){var p=LAST,im=p.imgs[i],r=p.rows[i],right=human.status===im.ai.status&&
+    human.reasons.slice().sort().join()===(im.ai.reasons||[]).map(function(x){return x.code}).sort().join();
+  im.fbOpen=false;im.fb="busy";show();
+  try{
+    if(await aiServer()){var b=await imgBody(p,i);b.agent={status:im.ai.status,reasons:im.ai.reasons};b.human=human;
+      var x=await fetch(SRV()+"/api/feedback",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(b)});if(!x.ok)throw new Error("HTTP "+x.status)}
+    else{var key=r.file?"file:"+r.raw+":"+(im.w||"")+"×"+(im.h||""):r.u;
+      await dbPut("feedback",{key:key,right:right,at:Date.now()});
+      if(!right&&im.aiPrep){await dbPut("examples",{key:key,small:im.aiPrep.small,desc:im.aiPrep.desc,status:human.status,reasons:human.reasons,why:human.why||"",at:Date.now()});EXBLOCKS=null}
+      aiInfo()}
+    im.fb="saved"}
+  catch(e){im.fb="";alert(L().fbFail)}
+  show()}
 $("#imgs").addEventListener("click",function(e){var b=e.target.closest("[data-fb]");if(!b||!LAST)return;
   var i=+b.getAttribute("data-i"),im=LAST.imgs[i],a=b.getAttribute("data-fb");if(!im||!im.ai)return;
   if(a==="ok")sendFb(i,{status:im.ai.status,reasons:(im.ai.reasons||[]).map(function(r){return r.code})});
@@ -935,18 +1076,39 @@ $("#imgs").addEventListener("click",function(e){var b=e.target.closest("[data-fb
     if(st==="rejected"&&!rs.length){box.querySelector("label").focus();return}
     sendFb(i,{status:st,reasons:st==="approved"?[]:rs,why:box.querySelector("input[type=text]").value.trim()})}});
 $("#ai").onclick=async function(){
-  if(AIBUSY||!LAST)return; var p=LAST,D=L();
-  try{var hr=await fetch(AI_BASE+"/api/health");if(!hr.ok)throw new Error()}catch(e){alert(D.aiNA);return}
-  var idx=p.imgs.map(function(im,i){return i}).filter(function(i){return p.rows[i].u}),k=0,done=0;
+  if(AIBUSY||!LAST)return; var p=LAST,D=L(),srv=await aiServer();
+  if(!srv&&!aiKey()){alert(D.aiKeyNone);$("#aiKey").focus();return}
+  var idx=p.imgs.map(function(im,i){return i}).filter(function(i){return p.rows[i].u}),k=0,done=0,stop=false;
   AIBUSY=true;$("#ai").disabled=true;$("#aiStat").textContent=D.aiStat.replace("{n}",0).replace("{t}",idx.length);
-  async function worker(){while(k<idx.length){var i=idx[k++],im=p.imgs[i];
+  async function worker(){while(k<idx.length&&!stop){var i=idx[k++],im=p.imgs[i];
     if(!im.ai)im.toolSt=rowStatus(im);im.aiBusy=true;im.aiErr="";if(LAST===p)show();
-    try{var r=await fetch(AI_BASE+"/api/judge",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(await imgBody(p,i))}),j=await r.json();
-      if(!r.ok)throw new Error(j.error||("HTTP "+r.status));im.ai=j;im.fb="";im.fbOpen=false}
-    catch(e){im.aiErr=String(e&&e.message||e).slice(0,160)}
+    try{
+      if(srv){var r=await fetch(SRV()+"/api/judge",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(await imgBody(p,i))}),j=await r.json();
+        if(!r.ok)throw new Error(j.error||("HTTP "+r.status));im.ai=j}
+      else im.ai=await aiDirect(p,i);
+      im.fb="";im.fbOpen=false}
+    catch(e){im.aiErr=String(e&&e.message||e).slice(0,160);if(e&&(e.code==="key"||e.code==="net")&&!stop){stop=true;alert(e.message)}}
     im.aiBusy=false;done++;$("#aiStat").textContent=L().aiStat.replace("{n}",done).replace("{t}",idx.length);if(LAST===p)show()}}
   await Promise.all([worker(),worker(),worker()]);
   AIBUSY=false;$("#ai").disabled=false;if(LAST===p)show()};
+
+/* ----- the settings card: key, what it has learnt, sharing the examples ----- */
+async function aiInfo(){var D=L();
+  $("#aiKeyStat").textContent=aiKey()?D.aiKeyOk:D.aiKeyNone;
+  try{var ex=await dbAll("examples"),fb=await dbAll("feedback"),ok=fb.filter(function(f){return f.right}).length;
+    $("#aiLearn").textContent=D.aiLearnT.replace("{n}",ex.length).replace("{a}",fb.length?Math.round(ok/fb.length*100)+"%":"—").replace("{m}",fb.length)+(ex.length>40?" · "+D.aiMany:"")}
+  catch(e){$("#aiLearn").textContent=""}}
+$("#aiKeySave").onclick=function(){var k=$("#aiKey").value.trim();aiSetKey(k,$("#aiKeyRem").checked);$("#aiKey").value="";aiInfo()};
+$("#aiExp").onclick=async function(){var ex=await dbAll("examples");if(!ex.length){alert(L().aiNoEx);return}
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({kind:"hsmqc-agent-examples",examples:ex})],{type:"application/json"}));
+  a.download="agent-examples.json";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000)};
+$("#aiImpF").onchange=async function(){var f=this.files[0];this.value="";if(!f)return;
+  try{var j=JSON.parse(await f.text()),n=0;if(j.kind!=="hsmqc-agent-examples")throw 0;
+    for(var e of j.examples){if(e&&e.key&&e.small&&e.desc&&["approved","rejected","review"].indexOf(e.status)>=0){
+      await dbPut("examples",{key:String(e.key),small:String(e.small),desc:String(e.desc),status:e.status,reasons:(e.reasons||[]).filter(function(c){return AI_CODES.indexOf(c)>=0}),why:String(e.why||""),at:+e.at||Date.now()});n++}}
+    EXBLOCKS=null;alert(L().aiImpOk.replace("{n}",n));aiInfo()}
+  catch(e){alert(L().aiImpBad)}};
+$("#aiClr").onclick=async function(){if(!confirm(L().aiClrQ))return;await dbDo("examples","readwrite",function(s){s.clear()});await dbDo("feedback","readwrite",function(s){s.clear()});EXBLOCKS=null;aiInfo()};
 $("#vBad").onclick=function(){VIEW_ALL=false;show()};
 $("#vAll").onclick=function(){VIEW_ALL=true;show()};
 /* images uploaded from the device: checked like links (through a local blob: address); the file name stands in for the link */
@@ -1246,7 +1408,7 @@ function apply(){
   document.querySelectorAll("[data-i]").forEach(function(e){var v=D[e.getAttribute("data-i")];if(typeof v==="string")e.textContent=v});
   $("#r1").innerHTML=D.r1.map(function(x){return "<li>"+esc(x)+"</li>"}).join("");
   $("#man").innerHTML=D.man.map(function(x){return "<li>"+esc(x)+"</li>"}).join("");
-  $("#lang").textContent=D.btn; showFiles(); show(); WITEMS.forEach(wDraw); if(WITEMS.length)wStat(); if(VIEW&&!VIEW.hidden)viewer(+VIEW.dataset.n);
+  $("#lang").textContent=D.btn; showFiles(); aiInfo(); show(); WITEMS.forEach(wDraw); if(WITEMS.length)wStat(); if(VIEW&&!VIEW.hidden)viewer(+VIEW.dataset.n);
   try{localStorage.setItem("hsmqc_lang",LANG)}catch(e){}
 }
 $("#lang").onclick=function(){LANG=LANG==="en"?"ar":"en";apply()};
