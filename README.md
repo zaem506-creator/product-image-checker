@@ -18,10 +18,10 @@
 
 ### مجاناً بـ GitHub Models
 
-في خانة الإيجنت اختار **GitHub Models — مجاني بحد يومي**، وحط توكن GitHub بدل مفتاح Claude:
+GitHub يرفض الاتصال من صفحة مفتوحة كملف (CORS)، فالأداة تكلمه عن طريق وسيط مجاني في Google Apps Script. خطوات إعداده في **[`apps-script/README.md`](apps-script/README.md)**. قبلها تحتاج توكن GitHub:
 1. ادخل github.com، واضغط صورتك ← **Settings** ← **Developer settings** ← **Personal access tokens** ← **Fine-grained tokens** ← **Generate new token**.
 2. سمّه، وحدد مدة انتهاء، ومن **Permissions** أضف **Models** واختار **Read-only**. اضغط **Generate token** وانسخه (يبدأ بـ `github_pat_`).
-3. حطه في الأداة واضغط **حفظ المفتاح**.
+3. حطه في الوسيط (Script Properties) مو في الأداة. وفي الأداة اختار **GitHub Models — مجاني بحد يومي**، وحط رابط الوسيط وكلمة السر حقه.
 
 حدود المجاني: تقريباً 50 صورة في اليوم، حسب المصادر. وأنا ما قدرت أتأكد من الرقم من GitHub مباشرة. والموديل (GPT-4.1) أقل دقة من Claude في التفاصيل الدقيقة. الأمثلة والتصحيحات نفسها تشتغل مع الخدمتين.
 

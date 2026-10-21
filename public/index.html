@@ -244,6 +244,7 @@ label.rem{display:flex;gap:6px;align-items:center;font-size:12.5px;margin-top:8p
 <div class="card" id="aiCard">
   <span class="lbl"><span class="step">🤖</span><span data-i="aiCardT"></span></span>
   <label class="fld" style="max-width:340px;margin-bottom:10px"><span data-i="aiProvL"></span><select id="aiProv"><option value="claude"></option><option value="github"></option></select></label>
+  <div class="row" id="aiUrlRow" style="margin:0 0 8px" hidden><input type="text" id="aiUrl" class="kin" placeholder="https://script.google.com/macros/s/.../exec" autocomplete="off" spellcheck="false"></div>
   <div class="row" style="margin-top:0"><input type="password" id="aiKey" class="kin" placeholder="" autocomplete="off" spellcheck="false"><button class="mini" id="aiKeySave" type="button" data-i="aiKeySave"></button></div>
   <label class="rem"><input type="checkbox" id="aiKeyRem"> <span data-i="aiKeyRem"></span></label>
   <div class="help" id="aiKeyStat" style="font-weight:700"></div>
@@ -301,8 +302,9 @@ var I={
   ai:"🤖 افحص بالإيجنت", aiStat:"الإيجنت: {n} من {t}", aiNA:"الإيجنت مو شغّال. شغّل السيرفر (npm start في مجلد agent) وافتح الأداة من http://localhost:8787", aiTag:"الإيجنت", aiBusy:"🤖 الإيجنت يفحص…", aiErr:"🤖 الإيجنت ما قدر يفحصها: ", aiTool:"الأداة كانت: ",
   fbQ:"قرار الإيجنت صح؟", fbOk:"✓ صح", fbNo:"✕ غلط", fbSave:"حفظ", fbCancel:"إلغاء", fbWhy:"ليش؟ (اختياري — يساعده يتعلم)", fbSaved:"✓ انحفظ — الإيجنت بيتعلم منه", fbFail:"ما قدرت أحفظ التصحيح — تأكد إن السيرفر شغّال", fbWait:"تقدر تصحّح بعد ما يخلص الفحص", fbRight:"القرار الصحيح:",
   aiProvL:"الخدمة اللي يستخدمها الإيجنت", provClaude:"Claude — مدفوع، الأدق", provGh:"GitHub Models — مجاني بحد يومي",
-  aiKeyNoneGh:"حط توكن GitHub (يبدأ بـ github_pat_) عشان يشتغل الإيجنت",
-  aiKeyHelpGh:"التوكن من github.com: صورتك ← Settings ← Developer settings ← Personal access tokens ← Fine-grained tokens ← Generate new token، ومن Permissions اختار Models: Read-only. يبقى في متصفحك بس. الصور اللي يفحصها الإيجنت تنرسل لـ GitHub (Microsoft). الحد المجاني تقريباً 50 صورة في اليوم.",
+  aiKeyNoneGh:"حط رابط الوسيط (Apps Script) وكلمة السر حقه عشان يشتغل الإيجنت",
+  aiKeyHelpGh:"GitHub ما يقبل الاتصال من صفحة مفتوحة كملف، فالإيجنت يكلمه عن طريق وسيط في Google Apps Script (الخطوات في apps-script/README). فوق: رابط الوسيط (Web app URL). تحت: كلمة السر اللي حطيتها في SECRET. التوكن نفسه يبقى في الوسيط. الصور اللي يفحصها الإيجنت تنرسل لـ GitHub (Microsoft). الحد المجاني تقريباً 50 صورة في اليوم.",
+  aiSecretBad:"كلمة سر الوسيط غلط — لازم تكون نفس اللي في SECRET", aiSetup:"الوسيط ناقصه GITHUB_TOKEN أو SECRET في Script Properties",
   aiLimit:"خلص الحد المجاني في GitHub Models — كمّل بعد شوي أو بكرة", aiNetGh:"ما قدرت أوصل لـ GitHub Models — يمكن الشبكة حاجبتها، أو الموقع ما يسمح بالاتصال من المتصفح",
   aiCardT:"الإيجنت", aiKeySave:"حفظ المفتاح", aiKeyRem:"تذكّر المفتاح في هذا المتصفح (لا تختاره في جهاز مشترك)", aiKeyOk:"✓ المفتاح محفوظ — الإيجنت جاهز", aiKeyNone:"حط مفتاح Claude (يبدأ بـ sk-ant-) عشان يشتغل الإيجنت",
   aiKeyHelp:"المفتاح يبقى في متصفحك بس، وما ينحفظ داخل الملف. الصور اللي يفحصها الإيجنت تنرسل لـ Claude (Anthropic).",
@@ -338,8 +340,9 @@ var I={
   ai:"🤖 Check with the agent", aiStat:"Agent: {n} of {t}", aiNA:"The agent isn't running. Start the server (npm start in the agent folder) and open the tool from http://localhost:8787", aiTag:"Agent", aiBusy:"🤖 The agent is checking…", aiErr:"🤖 The agent couldn't check it: ", aiTool:"The tool said: ",
   fbQ:"Is the agent right?", fbOk:"✓ Right", fbNo:"✕ Wrong", fbSave:"Save", fbCancel:"Cancel", fbWhy:"Why? (optional — helps it learn)", fbSaved:"✓ Saved — the agent will learn from it", fbFail:"Couldn't save the correction — check that the server is running", fbWait:"You can correct it once the check has finished", fbRight:"The right decision:",
   aiProvL:"The service the agent uses", provClaude:"Claude — paid, most accurate", provGh:"GitHub Models — free, daily limit",
-  aiKeyNoneGh:"Add a GitHub token (starts with github_pat_) for the agent to work",
-  aiKeyHelpGh:"Get the token on github.com: your picture → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token, and under Permissions pick Models: Read-only. It stays in your browser only. Images the agent checks are sent to GitHub (Microsoft). The free limit is about 50 images a day.",
+  aiKeyNoneGh:"Add the relay link (Apps Script) and its password for the agent to work",
+  aiKeyHelpGh:"GitHub refuses calls from a page opened as a file, so the agent reaches it through a relay in Google Apps Script (steps in apps-script/README). Above: the relay link (Web app URL). Below: the password you set as SECRET. The token itself stays in the relay. Images the agent checks are sent to GitHub (Microsoft). The free limit is about 50 images a day.",
+  aiSecretBad:"Wrong relay password — it must match SECRET", aiSetup:"The relay is missing GITHUB_TOKEN or SECRET in Script Properties",
   aiLimit:"The free GitHub Models limit is used up — continue later or tomorrow", aiNetGh:"Couldn't reach GitHub Models — the network may block it, or it may not accept calls from a browser",
   aiCardT:"The agent", aiKeySave:"Save key", aiKeyRem:"Remember the key in this browser (not on a shared computer)", aiKeyOk:"✓ Key saved — the agent is ready", aiKeyNone:"Add a Claude key (starts with sk-ant-) for the agent to work",
   aiKeyHelp:"The key stays in your browser only and is never saved in the file. Images the agent checks are sent to Claude (Anthropic).",
@@ -956,6 +959,7 @@ function SRV(){return /^https?:$/.test(location.protocol)?"":"http://localhost:8
 function aiProv(){try{return localStorage.getItem("hsmqc_prov")==="github"?"github":"claude"}catch(e){return "claude"}}
 function keyName(){return aiProv()==="github"?"hsmqc_ghkey":"hsmqc_key"}
 function aiKey(){var n=keyName();try{return sessionStorage.getItem(n)||localStorage.getItem(n)||""}catch(e){return ""}}
+function aiUrl(){try{return localStorage.getItem("hsmqc_relay")||""}catch(e){return ""}}
 function aiSetKey(k,rem){var n=keyName();try{sessionStorage.removeItem(n);localStorage.removeItem(n);if(k)(rem?localStorage:sessionStorage).setItem(n,k)}catch(e){}}
 
 /* ----- examples and corrections: IndexedDB of this browser ----- */
@@ -1013,9 +1017,10 @@ async function aiExamples(){
     EXBLOCKS=out}
   return EXBLOCKS}
 function aiErr(code,msg){var e=new Error(msg);e.code=code;return e}
-/* GitHub Models: an OpenAI-style chat request. Its free tier takes about 8K input tokens per request, so the examples go
+/* GitHub Models, through the Apps Script relay in apps-script/Code.gs (GitHub refuses calls from a page opened as a file):
+   an OpenAI-style chat request. Its free tier takes about 8K input tokens per request, so the examples go
    at low detail and only the latest 15; the reply is asked for as plain JSON and read leniently */
-var GH_API="https://models.github.ai/inference/chat/completions",GH_MODEL="openai/gpt-4.1";
+var GH_MODEL="openai/gpt-4.1";
 var GH_JSON='Reply with only a JSON object, no other text, in this shape: {"status":"approved"|"rejected"|"review","reasons":[{"code":"bg"|"shadow"|"center"|"zoomin"|"zoomout"|"human"|"res"|"reflect","detail":"..."}],"note":"..."}';
 async function ghAsk(prep){
   var ex=(await dbAll("examples")).sort(function(a,b){return a.at<b.at?-1:1}).slice(-15),content=[];
@@ -1027,12 +1032,17 @@ async function ghAsk(prep){
   var body=JSON.stringify({model:GH_MODEL,messages:[{role:"system",content:AI_RULES},{role:"user",content:content}],max_tokens:1500,temperature:0});
   for(var a=0;;a++){
     var r;
-    try{r=await fetch(GH_API,{method:"POST",body:body,headers:{"content-type":"application/json","authorization":"Bearer "+aiKey()}})}
+    /* plain text body, no custom headers: a "simple" request the Apps Script relay accepts from a file page */
+    var x;
+    try{var rr=await fetch(aiUrl(),{method:"POST",body:JSON.stringify({secret:aiKey(),body:JSON.parse(body)})});x=await rr.json()}
     catch(e){if(a<1){await wait(2000);continue}throw aiErr("net",L().aiNetGh)}
+    if(x.error==="secret")throw aiErr("key",L().aiSecretBad);
+    if(x.error)throw aiErr("key",x.error==="setup"?L().aiSetup:String(x.message||x.error));
+    var r={status:x.status,ok:x.status>=200&&x.status<300};
     if(r.status===401||r.status===403)throw aiErr("key",L().aiKeyBad);
-    if(r.status===429){var ra=+(r.headers.get("retry-after")||0);if(ra&&ra<=60&&a<3){await wait(ra*1000);continue}throw aiErr("limit",L().aiLimit)}
+    if(r.status===429){var ra=+(x.retryAfter||0);if(ra&&ra<=60&&a<3){await wait(ra*1000);continue}throw aiErr("limit",L().aiLimit)}
     if(r.status>=500&&a<2){await wait(4000*(a+1));continue}
-    var j=await r.json().catch(function(){return {}});
+    var j;try{j=JSON.parse(x.body)}catch(e){j={}}
     if(!r.ok)throw aiErr("api",String(j.error&&(j.error.message||j.error.code)||j.message||("HTTP "+r.status)).slice(0,160));
     var t=(((j.choices||[])[0]||{}).message||{}).content||"",m=/\{[\s\S]*\}/.exec(t);
     try{return JSON.parse(m[0])}catch(e){return {status:"review",reasons:[],note:L().aiRefused}}
@@ -1117,7 +1127,7 @@ $("#imgs").addEventListener("click",function(e){var b=e.target.closest("[data-fb
     sendFb(i,{status:st,reasons:st==="approved"?[]:rs,why:box.querySelector("input[type=text]").value.trim()})}});
 $("#ai").onclick=async function(){
   if(AIBUSY||!LAST)return; var p=LAST,D=L(),srv=await aiServer();
-  if(!srv&&!aiKey()){alert(aiProv()==="github"?D.aiKeyNoneGh:D.aiKeyNone);$("#aiKey").focus();return}
+  if(!srv&&(!aiKey()||aiProv()==="github"&&!aiUrl())){alert(aiProv()==="github"?D.aiKeyNoneGh:D.aiKeyNone);$("#aiKey").focus();return}
   var idx=p.imgs.map(function(im,i){return i}).filter(function(i){return p.rows[i].u}),k=0,done=0,stop=false;
   AIBUSY=true;$("#ai").disabled=true;$("#aiStat").textContent=D.aiStat.replace("{n}",0).replace("{t}",idx.length);
   async function worker(){while(k<idx.length&&!stop){var i=idx[k++],im=p.imgs[i];
@@ -1135,14 +1145,17 @@ $("#ai").onclick=async function(){
 /* ----- the settings card: key, what it has learnt, sharing the examples ----- */
 async function aiInfo(){var D=L(),gh=aiProv()==="github",o=$("#aiProv").options;
   o[0].textContent=D.provClaude;o[1].textContent=D.provGh;$("#aiProv").value=aiProv();
-  $("#aiKey").placeholder=gh?"github_pat_...":"sk-ant-...";
+  $("#aiKey").placeholder=gh?(LANG==="ar"?"كلمة سر الوسيط":"Relay password"):"sk-ant-...";
+  $("#aiUrlRow").hidden=!gh;$("#aiUrl").value=aiUrl();
   $("#aiKeyHelp").textContent=gh?D.aiKeyHelpGh:D.aiKeyHelp;
-  $("#aiKeyStat").textContent=aiKey()?D.aiKeyOk:gh?D.aiKeyNoneGh:D.aiKeyNone;
+  $("#aiKeyStat").textContent=aiKey()&&(!gh||aiUrl())?D.aiKeyOk:gh?D.aiKeyNoneGh:D.aiKeyNone;
   try{var ex=await dbAll("examples"),fb=await dbAll("feedback"),ok=fb.filter(function(f){return f.right}).length;
     $("#aiLearn").textContent=D.aiLearnT.replace("{n}",ex.length).replace("{a}",fb.length?Math.round(ok/fb.length*100)+"%":"—").replace("{m}",fb.length)+(ex.length>40?" · "+D.aiMany:"")}
   catch(e){$("#aiLearn").textContent=""}}
 $("#aiProv").onchange=function(){try{localStorage.setItem("hsmqc_prov",this.value)}catch(e){}aiInfo()};
-$("#aiKeySave").onclick=function(){var k=$("#aiKey").value.trim();aiSetKey(k,$("#aiKeyRem").checked);$("#aiKey").value="";aiInfo()};
+$("#aiKeySave").onclick=function(){var k=$("#aiKey").value.trim();if(k)aiSetKey(k,$("#aiKeyRem").checked);$("#aiKey").value="";
+  if(aiProv()==="github")try{localStorage.setItem("hsmqc_relay",$("#aiUrl").value.trim())}catch(e){}
+  aiInfo()};
 $("#aiExp").onclick=async function(){var ex=await dbAll("examples");if(!ex.length){alert(L().aiNoEx);return}
   var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({kind:"hsmqc-agent-examples",examples:ex})],{type:"application/json"}));
   a.download="agent-examples.json";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},2000)};
