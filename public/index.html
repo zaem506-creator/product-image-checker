@@ -243,10 +243,11 @@ label.rem{display:flex;gap:6px;align-items:center;font-size:12.5px;margin-top:8p
 
 <div class="card" id="aiCard">
   <span class="lbl"><span class="step">🤖</span><span data-i="aiCardT"></span></span>
-  <div class="row" style="margin-top:0"><input type="password" id="aiKey" class="kin" placeholder="sk-ant-..." autocomplete="off" spellcheck="false"><button class="mini" id="aiKeySave" type="button" data-i="aiKeySave"></button></div>
+  <label class="fld" style="max-width:340px;margin-bottom:10px"><span data-i="aiProvL"></span><select id="aiProv"><option value="claude"></option><option value="github"></option></select></label>
+  <div class="row" style="margin-top:0"><input type="password" id="aiKey" class="kin" placeholder="" autocomplete="off" spellcheck="false"><button class="mini" id="aiKeySave" type="button" data-i="aiKeySave"></button></div>
   <label class="rem"><input type="checkbox" id="aiKeyRem"> <span data-i="aiKeyRem"></span></label>
   <div class="help" id="aiKeyStat" style="font-weight:700"></div>
-  <div class="help" data-i="aiKeyHelp"></div>
+  <div class="help" id="aiKeyHelp"></div>
   <div class="help" id="aiLearn"></div>
   <div class="row"><button class="mini" id="aiExp" type="button" data-i="aiExp"></button><label class="mini" style="cursor:pointer"><input type="file" id="aiImpF" accept=".json,application/json" hidden><span data-i="aiImp"></span></label><button class="mini" id="aiClr" type="button" data-i="aiClr"></button></div>
 </div>
@@ -299,7 +300,11 @@ var I={
   wModeAdd:"➕ إضافة", wModeRm:"➖ إزالة", wUndo:"تراجع", wReset:"إعادة", wDl:"تنزيل", wBusy:"جاري القص…", wFail:"ما قدرت أفتح الصورة", wStat:"{n} من {t} جاهزة", wLoadFail:"ما قدرت أحمّل أداة القص (تحتاج إنترنت أول مرة)", wNone:"حط رابط أو ارفع صورة",
   ai:"🤖 افحص بالإيجنت", aiStat:"الإيجنت: {n} من {t}", aiNA:"الإيجنت مو شغّال. شغّل السيرفر (npm start في مجلد agent) وافتح الأداة من http://localhost:8787", aiTag:"الإيجنت", aiBusy:"🤖 الإيجنت يفحص…", aiErr:"🤖 الإيجنت ما قدر يفحصها: ", aiTool:"الأداة كانت: ",
   fbQ:"قرار الإيجنت صح؟", fbOk:"✓ صح", fbNo:"✕ غلط", fbSave:"حفظ", fbCancel:"إلغاء", fbWhy:"ليش؟ (اختياري — يساعده يتعلم)", fbSaved:"✓ انحفظ — الإيجنت بيتعلم منه", fbFail:"ما قدرت أحفظ التصحيح — تأكد إن السيرفر شغّال", fbWait:"تقدر تصحّح بعد ما يخلص الفحص", fbRight:"القرار الصحيح:",
-  aiCardT:"الإيجنت — مفتاح Claude", aiKeySave:"حفظ المفتاح", aiKeyRem:"تذكّر المفتاح في هذا المتصفح (لا تختاره في جهاز مشترك)", aiKeyOk:"✓ المفتاح محفوظ — الإيجنت جاهز", aiKeyNone:"حط مفتاح Claude (يبدأ بـ sk-ant-) عشان يشتغل الإيجنت",
+  aiProvL:"الخدمة اللي يستخدمها الإيجنت", provClaude:"Claude — مدفوع، الأدق", provGh:"GitHub Models — مجاني بحد يومي",
+  aiKeyNoneGh:"حط توكن GitHub (يبدأ بـ github_pat_) عشان يشتغل الإيجنت",
+  aiKeyHelpGh:"التوكن من github.com: صورتك ← Settings ← Developer settings ← Personal access tokens ← Fine-grained tokens ← Generate new token، ومن Permissions اختار Models: Read-only. يبقى في متصفحك بس. الصور اللي يفحصها الإيجنت تنرسل لـ GitHub (Microsoft). الحد المجاني تقريباً 50 صورة في اليوم.",
+  aiLimit:"خلص الحد المجاني في GitHub Models — كمّل بعد شوي أو بكرة", aiNetGh:"ما قدرت أوصل لـ GitHub Models — يمكن الشبكة حاجبتها، أو الموقع ما يسمح بالاتصال من المتصفح",
+  aiCardT:"الإيجنت", aiKeySave:"حفظ المفتاح", aiKeyRem:"تذكّر المفتاح في هذا المتصفح (لا تختاره في جهاز مشترك)", aiKeyOk:"✓ المفتاح محفوظ — الإيجنت جاهز", aiKeyNone:"حط مفتاح Claude (يبدأ بـ sk-ant-) عشان يشتغل الإيجنت",
   aiKeyHelp:"المفتاح يبقى في متصفحك بس، وما ينحفظ داخل الملف. الصور اللي يفحصها الإيجنت تنرسل لـ Claude (Anthropic).",
   aiLearnT:"تعلّم من {n} مثال · دقته في الصور اللي صحّحتها: {a} (من {m} صورة)", aiMany:"الأمثلة كثيرة — كل فحص صار أبطأ وأغلى", aiExp:"تصدير الأمثلة", aiImp:"استيراد أمثلة", aiClr:"مسح الأمثلة والتصحيحات",
   aiClrQ:"أكيد تبي تمسح كل الأمثلة والتصحيحات؟ الإيجنت بينسى كل اللي تعلمه.", aiImpOk:"انضاف {n} مثال", aiImpBad:"الملف مو ملف أمثلة الإيجنت", aiNoEx:"ما فيه أمثلة للحين — صحّح أغلاط الإيجنت وتنضاف لحالها",
@@ -332,7 +337,11 @@ var I={
   wModeAdd:"➕ Add", wModeRm:"➖ Remove", wUndo:"Undo", wReset:"Reset", wDl:"Download", wBusy:"Cutting…", wFail:"Couldn't open the image", wStat:"{n} of {t} ready", wLoadFail:"Couldn't load the cut-out tool (needs internet the first time)", wNone:"Add a link or upload an image",
   ai:"🤖 Check with the agent", aiStat:"Agent: {n} of {t}", aiNA:"The agent isn't running. Start the server (npm start in the agent folder) and open the tool from http://localhost:8787", aiTag:"Agent", aiBusy:"🤖 The agent is checking…", aiErr:"🤖 The agent couldn't check it: ", aiTool:"The tool said: ",
   fbQ:"Is the agent right?", fbOk:"✓ Right", fbNo:"✕ Wrong", fbSave:"Save", fbCancel:"Cancel", fbWhy:"Why? (optional — helps it learn)", fbSaved:"✓ Saved — the agent will learn from it", fbFail:"Couldn't save the correction — check that the server is running", fbWait:"You can correct it once the check has finished", fbRight:"The right decision:",
-  aiCardT:"The agent — Claude key", aiKeySave:"Save key", aiKeyRem:"Remember the key in this browser (not on a shared computer)", aiKeyOk:"✓ Key saved — the agent is ready", aiKeyNone:"Add a Claude key (starts with sk-ant-) for the agent to work",
+  aiProvL:"The service the agent uses", provClaude:"Claude — paid, most accurate", provGh:"GitHub Models — free, daily limit",
+  aiKeyNoneGh:"Add a GitHub token (starts with github_pat_) for the agent to work",
+  aiKeyHelpGh:"Get the token on github.com: your picture → Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token, and under Permissions pick Models: Read-only. It stays in your browser only. Images the agent checks are sent to GitHub (Microsoft). The free limit is about 50 images a day.",
+  aiLimit:"The free GitHub Models limit is used up — continue later or tomorrow", aiNetGh:"Couldn't reach GitHub Models — the network may block it, or it may not accept calls from a browser",
+  aiCardT:"The agent", aiKeySave:"Save key", aiKeyRem:"Remember the key in this browser (not on a shared computer)", aiKeyOk:"✓ Key saved — the agent is ready", aiKeyNone:"Add a Claude key (starts with sk-ant-) for the agent to work",
   aiKeyHelp:"The key stays in your browser only and is never saved in the file. Images the agent checks are sent to Claude (Anthropic).",
   aiLearnT:"Learnt from {n} example(s) · accuracy on the images you corrected: {a} (of {m})", aiMany:"Many examples make every check slower and dearer", aiExp:"Export examples", aiImp:"Import examples", aiClr:"Clear examples and corrections",
   aiClrQ:"Clear all examples and corrections? The agent forgets everything it has learnt.", aiImpOk:"{n} example(s) added", aiImpBad:"This is not an agent examples file", aiNoEx:"No examples yet — correct the agent's mistakes and they are added automatically",
@@ -829,8 +838,10 @@ function show(){
   var note=order.map(function(n){var r=p.rows[n];return "Image "+(n+1)+": "+by[n].join(", ")}).join("\n");
   $("#noteBox").hidden=!bad.length; $("#note").textContent=note; $("#note").style.whiteSpace="pre-line"; $("#xlsRow").hidden=false;
   /* problems first: rejected, then needs review, then clean (each keeps the pasted order); by default only the problems show */
-  var rank={bad:0,rev:1,ok:2},all=p.imgs.map(function(im,i){return i}).sort(function(a,b){return rank[rowStatus(p.imgs[a])]-rank[rowStatus(p.imgs[b])]||a-b});
-  var nBad=all.filter(function(i){return rowStatus(p.imgs[i])!=="ok"}).length;
+  /* an image the agent approved but the tool had flagged stays in view, so the reviewer can confirm or correct the agent */
+  var rk=function(im){var st=rowStatus(im);return st==="bad"?0:st==="rev"?1:im.ai&&im.toolSt&&im.toolSt!=="ok"?2:3};
+  var all=p.imgs.map(function(im,i){return i}).sort(function(a,b){return rk(p.imgs[a])-rk(p.imgs[b])||a-b});
+  var nBad=all.filter(function(i){return rk(p.imgs[i])<3}).length;
   p.order=VIEW_ALL?all:all.slice(0,nBad);
   $("#viewChips").hidden=false; $("#vBad").textContent=D.vBad.replace("{n}",nBad); $("#vAll").textContent=D.vAll.replace("{n}",all.length);
   $("#vBad").setAttribute("aria-pressed",String(!VIEW_ALL)); $("#vAll").setAttribute("aria-pressed",String(VIEW_ALL));
@@ -941,8 +952,11 @@ async function aiServer(){
 function SRV(){return /^https?:$/.test(location.protocol)?"":"http://localhost:8787"}
 
 /* ----- the key: in this browser only (this tab, or remembered when the user asks) ----- */
-function aiKey(){try{return sessionStorage.getItem("hsmqc_key")||localStorage.getItem("hsmqc_key")||""}catch(e){return ""}}
-function aiSetKey(k,rem){try{sessionStorage.removeItem("hsmqc_key");localStorage.removeItem("hsmqc_key");if(k)(rem?localStorage:sessionStorage).setItem("hsmqc_key",k)}catch(e){}}
+/* which service judges: Claude (paid) or GitHub Models (free, with a daily limit); each keeps its own key */
+function aiProv(){try{return localStorage.getItem("hsmqc_prov")==="github"?"github":"claude"}catch(e){return "claude"}}
+function keyName(){return aiProv()==="github"?"hsmqc_ghkey":"hsmqc_key"}
+function aiKey(){var n=keyName();try{return sessionStorage.getItem(n)||localStorage.getItem(n)||""}catch(e){return ""}}
+function aiSetKey(k,rem){var n=keyName();try{sessionStorage.removeItem(n);localStorage.removeItem(n);if(k)(rem?localStorage:sessionStorage).setItem(n,k)}catch(e){}}
 
 /* ----- examples and corrections: IndexedDB of this browser ----- */
 var IDB=null;
@@ -981,7 +995,7 @@ async function aiPrep(blob){
     o?"Outline of non-white pixels: fills "+pc(o.fill)+" along its longer side; its horizontal centre is "+pc(o.off)+" of the width from the image centre; touches "+o.touch+" of 4 edges."
      :"Outline of non-white pixels: none found (the image is almost all white, or the background is not white)."].join("\n");
   /* the image to judge at the model's full detail; a lighter copy is kept in case it becomes an example */
-  var out={jpeg:jpegOf(img,1568,w,h,0.92),small:jpegOf(img,768,w,h,0.85),w:w,h:h,desc:desc};
+  var out={jpeg:jpegOf(img,1568,w,h,0.92),mid:jpegOf(img,1024,w,h,0.9),small:jpegOf(img,768,w,h,0.85),w:w,h:h,desc:desc};
   if(img.close)try{img.close()}catch(e){}
   return out;
 }
@@ -999,7 +1013,33 @@ async function aiExamples(){
     EXBLOCKS=out}
   return EXBLOCKS}
 function aiErr(code,msg){var e=new Error(msg);e.code=code;return e}
+/* GitHub Models: an OpenAI-style chat request. Its free tier takes about 8K input tokens per request, so the examples go
+   at low detail and only the latest 15; the reply is asked for as plain JSON and read leniently */
+var GH_API="https://models.github.ai/inference/chat/completions",GH_MODEL="openai/gpt-4.1";
+var GH_JSON='Reply with only a JSON object, no other text, in this shape: {"status":"approved"|"rejected"|"review","reasons":[{"code":"bg"|"shadow"|"center"|"zoomin"|"zoomout"|"human"|"res"|"reflect","detail":"..."}],"note":"..."}';
+async function ghAsk(prep){
+  var ex=(await dbAll("examples")).sort(function(a,b){return a.at<b.at?-1:1}).slice(-15),content=[];
+  if(ex.length){content.push({type:"text",text:ex.length+" examples of the audit team's past decisions:"});
+    ex.forEach(function(e,n){content.push({type:"text",text:"Example "+(n+1)+" — the audit team's decision: "+e.status+(e.status!=="approved"&&e.reasons.length?" — "+e.reasons.join(", "):"")+"."+(e.why?" Why: "+e.why:"")+"\n"+e.desc},
+      {type:"image_url",image_url:{url:"data:image/jpeg;base64,"+e.small,detail:"low"}})})}
+  content.push({type:"text",text:"The image to audit:"},{type:"image_url",image_url:{url:"data:image/jpeg;base64,"+prep.mid,detail:"high"}},
+    {type:"text",text:"Measurements of this image:\n"+prep.desc+"\n\nAudit it against every rule and give your verdict. "+GH_JSON});
+  var body=JSON.stringify({model:GH_MODEL,messages:[{role:"system",content:AI_RULES},{role:"user",content:content}],max_tokens:1500,temperature:0});
+  for(var a=0;;a++){
+    var r;
+    try{r=await fetch(GH_API,{method:"POST",body:body,headers:{"content-type":"application/json","authorization":"Bearer "+aiKey()}})}
+    catch(e){if(a<1){await wait(2000);continue}throw aiErr("net",L().aiNetGh)}
+    if(r.status===401||r.status===403)throw aiErr("key",L().aiKeyBad);
+    if(r.status===429){var ra=+(r.headers.get("retry-after")||0);if(ra&&ra<=60&&a<3){await wait(ra*1000);continue}throw aiErr("limit",L().aiLimit)}
+    if(r.status>=500&&a<2){await wait(4000*(a+1));continue}
+    var j=await r.json().catch(function(){return {}});
+    if(!r.ok)throw aiErr("api",String(j.error&&(j.error.message||j.error.code)||j.message||("HTTP "+r.status)).slice(0,160));
+    var t=(((j.choices||[])[0]||{}).message||{}).content||"",m=/\{[\s\S]*\}/.exec(t);
+    try{return JSON.parse(m[0])}catch(e){return {status:"review",reasons:[],note:L().aiRefused}}
+  }
+}
 async function aiAsk(prep){
+  if(aiProv()==="github")return ghAsk(prep);
   var content=(await aiExamples()).map(function(b){return Object.assign({},b)});
   /* the cache ends after the last example: rules and examples are the same on every call */
   if(content.length)content[content.length-1].cache_control={type:"ephemeral",ttl:"1h"};
@@ -1077,7 +1117,7 @@ $("#imgs").addEventListener("click",function(e){var b=e.target.closest("[data-fb
     sendFb(i,{status:st,reasons:st==="approved"?[]:rs,why:box.querySelector("input[type=text]").value.trim()})}});
 $("#ai").onclick=async function(){
   if(AIBUSY||!LAST)return; var p=LAST,D=L(),srv=await aiServer();
-  if(!srv&&!aiKey()){alert(D.aiKeyNone);$("#aiKey").focus();return}
+  if(!srv&&!aiKey()){alert(aiProv()==="github"?D.aiKeyNoneGh:D.aiKeyNone);$("#aiKey").focus();return}
   var idx=p.imgs.map(function(im,i){return i}).filter(function(i){return p.rows[i].u}),k=0,done=0,stop=false;
   AIBUSY=true;$("#ai").disabled=true;$("#aiStat").textContent=D.aiStat.replace("{n}",0).replace("{t}",idx.length);
   async function worker(){while(k<idx.length&&!stop){var i=idx[k++],im=p.imgs[i];
@@ -1087,17 +1127,21 @@ $("#ai").onclick=async function(){
         if(!r.ok)throw new Error(j.error||("HTTP "+r.status));im.ai=j}
       else im.ai=await aiDirect(p,i);
       im.fb="";im.fbOpen=false}
-    catch(e){im.aiErr=String(e&&e.message||e).slice(0,160);if(e&&(e.code==="key"||e.code==="net")&&!stop){stop=true;alert(e.message)}}
+    catch(e){im.aiErr=String(e&&e.message||e).slice(0,160);if(e&&(e.code==="key"||e.code==="net"||e.code==="limit")&&!stop){stop=true;alert(e.message)}}
     im.aiBusy=false;done++;$("#aiStat").textContent=L().aiStat.replace("{n}",done).replace("{t}",idx.length);if(LAST===p)show()}}
   await Promise.all([worker(),worker(),worker()]);
   AIBUSY=false;$("#ai").disabled=false;if(LAST===p)show()};
 
 /* ----- the settings card: key, what it has learnt, sharing the examples ----- */
-async function aiInfo(){var D=L();
-  $("#aiKeyStat").textContent=aiKey()?D.aiKeyOk:D.aiKeyNone;
+async function aiInfo(){var D=L(),gh=aiProv()==="github",o=$("#aiProv").options;
+  o[0].textContent=D.provClaude;o[1].textContent=D.provGh;$("#aiProv").value=aiProv();
+  $("#aiKey").placeholder=gh?"github_pat_...":"sk-ant-...";
+  $("#aiKeyHelp").textContent=gh?D.aiKeyHelpGh:D.aiKeyHelp;
+  $("#aiKeyStat").textContent=aiKey()?D.aiKeyOk:gh?D.aiKeyNoneGh:D.aiKeyNone;
   try{var ex=await dbAll("examples"),fb=await dbAll("feedback"),ok=fb.filter(function(f){return f.right}).length;
     $("#aiLearn").textContent=D.aiLearnT.replace("{n}",ex.length).replace("{a}",fb.length?Math.round(ok/fb.length*100)+"%":"—").replace("{m}",fb.length)+(ex.length>40?" · "+D.aiMany:"")}
   catch(e){$("#aiLearn").textContent=""}}
+$("#aiProv").onchange=function(){try{localStorage.setItem("hsmqc_prov",this.value)}catch(e){}aiInfo()};
 $("#aiKeySave").onclick=function(){var k=$("#aiKey").value.trim();aiSetKey(k,$("#aiKeyRem").checked);$("#aiKey").value="";aiInfo()};
 $("#aiExp").onclick=async function(){var ex=await dbAll("examples");if(!ex.length){alert(L().aiNoEx);return}
   var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({kind:"hsmqc-agent-examples",examples:ex})],{type:"application/json"}));
