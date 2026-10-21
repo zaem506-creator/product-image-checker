@@ -1044,8 +1044,13 @@ async function ghAsk(prep){
     if(r.status>=500&&a<2){await wait(4000*(a+1));continue}
     var j;try{j=JSON.parse(x.body)}catch(e){j={}}
     if(!r.ok)throw aiErr("api",String(j.error&&(j.error.message||j.error.code)||j.message||("HTTP "+r.status)).slice(0,160));
-    var t=(((j.choices||[])[0]||{}).message||{}).content||"",m=/\{[\s\S]*\}/.exec(t);
-    try{return JSON.parse(m[0])}catch(e){return {status:"review",reasons:[],note:L().aiRefused}}
+    var ch=(j.choices||[])[0]||{},t=(ch.message||{}).content||"",m=/\{[\s\S]*\}/.exec(t);
+    try{return JSON.parse(m[0])}
+    catch(e){
+      /* an answer that isn't the expected JSON: show what came back, so the cause can be seen */
+      console.warn("GitHub Models reply that could not be read:",x.body);
+      var why=t?t.replace(/\s+/g," ").slice(0,140):"finish_reason: "+(ch.finish_reason||"—")+" · "+String(x.body||"").replace(/\s+/g," ").slice(0,140);
+      return {status:"review",reasons:[],note:L().aiRefused+" ("+why+")"}}
   }
 }
 async function aiAsk(prep){
