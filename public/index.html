@@ -304,7 +304,7 @@ var I={
   aiProvL:"الخدمة اللي يستخدمها الإيجنت", provClaude:"Claude — مدفوع، الأدق", provGh:"GitHub Models — مجاني بحد يومي",
   aiKeyNoneGh:"حط رابط الوسيط (Apps Script) وكلمة السر حقه عشان يشتغل الإيجنت",
   aiKeyHelpGh:"GitHub ما يقبل الاتصال من صفحة مفتوحة كملف، فالإيجنت يكلمه عن طريق وسيط في Google Apps Script (الخطوات في apps-script/README). فوق: رابط الوسيط (Web app URL). تحت: كلمة السر اللي حطيتها في SECRET. التوكن نفسه يبقى في الوسيط. الصور اللي يفحصها الإيجنت تنرسل لـ GitHub (Microsoft). الحد المجاني تقريباً 50 صورة في اليوم.",
-  aiSecretBad:"كلمة سر الوسيط غلط — لازم تكون نفس اللي في SECRET", aiSetup:"الوسيط ناقصه GITHUB_TOKEN أو SECRET في Script Properties",
+  aiSecretBad:"كلمة سر الوسيط غلط — لازم تكون نفس اللي في SECRET", aiRelayOdd:"الوسيط رد بشي غير متوقع:", aiSetup:"الوسيط ناقصه GITHUB_TOKEN أو SECRET في Script Properties",
   aiLimit:"خلص الحد المجاني في GitHub Models — كمّل بعد شوي أو بكرة", aiNetGh:"ما قدرت أوصل لـ GitHub Models — يمكن الشبكة حاجبتها، أو الموقع ما يسمح بالاتصال من المتصفح",
   aiCardT:"الإيجنت", aiKeySave:"حفظ المفتاح", aiKeyRem:"تذكّر المفتاح في هذا المتصفح (لا تختاره في جهاز مشترك)", aiKeyOk:"✓ المفتاح محفوظ — الإيجنت جاهز", aiKeyNone:"حط مفتاح Claude (يبدأ بـ sk-ant-) عشان يشتغل الإيجنت",
   aiKeyHelp:"المفتاح يبقى في متصفحك بس، وما ينحفظ داخل الملف. الصور اللي يفحصها الإيجنت تنرسل لـ Claude (Anthropic).",
@@ -342,7 +342,7 @@ var I={
   aiProvL:"The service the agent uses", provClaude:"Claude — paid, most accurate", provGh:"GitHub Models — free, daily limit",
   aiKeyNoneGh:"Add the relay link (Apps Script) and its password for the agent to work",
   aiKeyHelpGh:"GitHub refuses calls from a page opened as a file, so the agent reaches it through a relay in Google Apps Script (steps in apps-script/README). Above: the relay link (Web app URL). Below: the password you set as SECRET. The token itself stays in the relay. Images the agent checks are sent to GitHub (Microsoft). The free limit is about 50 images a day.",
-  aiSecretBad:"Wrong relay password — it must match SECRET", aiSetup:"The relay is missing GITHUB_TOKEN or SECRET in Script Properties",
+  aiSecretBad:"Wrong relay password — it must match SECRET", aiRelayOdd:"The relay sent something unexpected:", aiSetup:"The relay is missing GITHUB_TOKEN or SECRET in Script Properties",
   aiLimit:"The free GitHub Models limit is used up — continue later or tomorrow", aiNetGh:"Couldn't reach GitHub Models — the network may block it, or it may not accept calls from a browser",
   aiCardT:"The agent", aiKeySave:"Save key", aiKeyRem:"Remember the key in this browser (not on a shared computer)", aiKeyOk:"✓ Key saved — the agent is ready", aiKeyNone:"Add a Claude key (starts with sk-ant-) for the agent to work",
   aiKeyHelp:"The key stays in your browser only and is never saved in the file. Images the agent checks are sent to Claude (Anthropic).",
@@ -1038,6 +1038,8 @@ async function ghAsk(prep){
     catch(e){if(a<1){await wait(2000);continue}throw aiErr("net",L().aiNetGh)}
     if(x.error==="secret")throw aiErr("key",L().aiSecretBad);
     if(x.error)throw aiErr("key",x.error==="setup"?L().aiSetup:String(x.message||x.error));
+    /* anything else that isn't GitHub's answer passed on (e.g. {"ok":true}: the request reached doGet, not doPost) */
+    if(typeof x.status!=="number"){console.warn("Relay reply:",x);throw aiErr("relay",L().aiRelayOdd+" "+JSON.stringify(x).slice(0,140))}
     var r={status:x.status,ok:x.status>=200&&x.status<300};
     if(r.status===401||r.status===403)throw aiErr("key",L().aiKeyBad);
     if(r.status===429){var ra=+(x.retryAfter||0);if(ra&&ra<=60&&a<3){await wait(ra*1000);continue}throw aiErr("limit",L().aiLimit)}
