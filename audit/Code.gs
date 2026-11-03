@@ -70,7 +70,8 @@ var NOT_DONE = ["", "new"];
 /* ===================== قراءة ===================== */
 
 function doGet(e) {
-  var p = (e && e.parameter) || {};
+  if (!e) return setup(); // تشغيل من المحرر بزر Run: يسوي الإعداد مهما كانت الدالة المختارة
+  var p = e.parameter || {};
   try {
     if (!p.action) return out_({ ok: true, hint: "deployed" });
     checkSecret_(p.key);
@@ -135,6 +136,7 @@ function tasks_(data, cols, agent, role) {
 /* ===================== حفظ ===================== */
 
 function doPost(e) {
+  if (!e) return setup();
   var req;
   try { req = JSON.parse(e.postData.contents); } catch (err) { return out_({ ok: false, error: "bad request" }); }
   try {
