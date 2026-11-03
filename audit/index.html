@@ -226,11 +226,18 @@ let agents = [], options = {}, cur = null, tasks = [], idx = 0;
 /* ---------------- الاتصال ---------------- */
 async function api(params) {
   const q = new URLSearchParams({ ...params, key: cfg.key, t: Date.now() });
-  return parse(await fetch(cfg.url + "?" + q, { redirect: "follow" }));
+  return parse(await send(cfg.url + "?" + q, { redirect: "follow" }));
 }
 async function apiPost(body) {
   // نص عادي (text/plain) عشان المتصفح ما يرسل طلب CORS مسبق يرفضه Apps Script
-  return parse(await fetch(cfg.url, { method: "POST", body: JSON.stringify({ ...body, key: cfg.key }), redirect: "follow" }));
+  return parse(await send(cfg.url, { method: "POST", body: JSON.stringify({ ...body, key: cfg.key }), redirect: "follow" }));
+}
+async function send(url, opts) {
+  try { return await fetch(url, opts); } catch {
+    throw new Error(navigator.onLine
+      ? "ما وصلنا للسكربت. غالباً النشر مو على Who has access: Anyone (لو مختار Anyone within الشركة، الصفحة ما تقدر توصل). من Apps Script: Deploy ← Manage deployments ← ✏️ وغيّرها لـ Anyone"
+      : "لا يوجد اتصال بالإنترنت");
+  }
 }
 async function parse(res) {
   const text = await res.text();
