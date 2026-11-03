@@ -9,21 +9,19 @@
 
 ## إعداد المشرف (مرة وحدة، تقريباً 10 دقائق)
 
-### 1. حط الملف في قوقل شيت
-1. ارفع ملف `New NL Audit….xlsx` على Google Drive، وافتحه، ومن **File ← Save as Google Sheets**.
-2. تأكد إن اسم الورقة **`Nutrition Validation`** (أو غيّر `SHEET_NAME` في أول `Code.gs`).
+### 1. الشيت
+اسم الورقة لازم يكون **`Nutrition Validation`** (أو غيّر `AUDIT_SHEET_NAME` في `Code.gs`).
 
-> الأداة تقرأ الأعمدة **بأسمائها**، فترتيبها ما يهم. المطلوب: `Master Product Code`, `Old Nutrition Link`, `Claude Nutrition link`, `Gemini Nutrition Link`, `Content Agent`, `Content Verdict`, `Info`, `Content Comments`, `Quality Verdict`, `Info`, `Quality Comments`. و`Cloud Decision` و`Claude Comment` (اختياريين) يظهرون للموظف فوق الصور.
+> الأداة تقرأ الأعمدة **بأسمائها**، فترتيبها ما يهم. المطلوب: `Master Product Code`, `Old Nutrition Link`, `Claude Nutrition link`, `Gemini Nutrition Link`, `Content Agent`, `Content Verdict`, `Info`, `Content Comments`, `Quality Agent`, `Quality Verdict`, `Info`, `Quality Comments`. و`Claude Decision` (اختياري) يحط وسم "اختيار الفرز الآلي" على الصورة.
+>
+> **عمود `Date`** (اختياري، يكون بين Info والـ Comments): لما القرار يصير Approved أو Need fixing، الأداة تكتب فيه التاريخ والوقت. هذا مهم لأن سكربت `onEdit` في الشيت **ما يشتغل** لما الكتابة تجي من سكربت ثاني، فالأداة تكتب التاريخ بنفسها.
 
-### 2. ألصق الكود
+### 2. ألصق الكود (كملف جديد، بدون ما تمسح سكربتكم)
 1. من الشيت: **Extensions ← Apps Script**.
-2. امسح الكود اللي فيه، والصق كل محتوى **`Code.gs`**، واضغط 💾.
-3. من القائمة اللي فوق اختار الدالة **`setup`** واضغط **▶ Run**. أول مرة يطلب صلاحيات: **Review permissions ← حسابك ← Advanced ← Go to … ← Allow**.
-4. تحت في **Execution log** يطلع لك سطر `API_KEY = ……`. **انسخ هذي القيمة**، هي كلمة السر.
-
-`setup` يضيف في آخر الشيت الأعمدة الناقصة:
-- **`Quality Agent`**: ملفك الحالي ما فيه هذا العمود، فبدونه ما تظهر أزرار موظفي الجودة. اكتب فيه أسماءهم.
-- **`Content Saved At`** و **`Quality Saved At`**: وقت آخر حفظ لكل منتج، عشان تتابع مين يشتغل ومتى.
+2. **لو فيه سكربت موجود** (مثل سكربت التاريخ): **لا تمسحه.** اضغط **+** جنب **Files** ← **Script**، وسمّه `Audit`، والصق فيه **`Code.gs`**. أسماء الكود كلها تبدأ بـ `audit`، فما تتعارض مع سكربتكم.
+   **لو المشروع فاضي:** الصق **`Code.gs`** مكان الموجود.
+3. احفظ (**Ctrl+S**)، واختار الدالة **`setupAudit`** واضغط **▶ Run**. أول مرة يطلب صلاحيات: **Review permissions ← حسابك ← Advanced ← Go to … ← Allow**.
+4. في **Execution log** يطلع لك عمود تاريخ المحتوى وعمود تاريخ الجودة اللي لقاها (مثلاً `M` و `R`). `setupAudit` ما يضيف ولا يغيّر أي عمود.
 
 ### 3. أضف صفحة الأداة داخل السكربت
 1. في Apps Script، جنب **Files** اضغط **+** ← **HTML**، وسمّه **`Index`** بالضبط (بدون `.html`، المحرر يضيفها).

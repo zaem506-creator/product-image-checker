@@ -1,48 +1,38 @@
 /**
  * أداة تدقيق الصور — الوسيط بين صفحة الموظفين وقوقل شيت.
- * يُلصق هذا الملف داخل الشيت نفسه (Extensions → Apps Script) ويُنشر كـ Web App.
+ * يُضاف كملف مستقل (مثلاً Audit.gs) جنب أي سكربت موجود في الشيت، بدون ما تمسح سكربتكم.
+ * كل الأسماء الداخلية تبدأ بـ audit عشان ما تتعارض معه.
+ * الدوال العامة: doGet و doPost و apiRead و apiSave و apiPing و setupAudit.
  *
  * - يقرأ الأعمدة بأسمائها لا بمواقعها، فترتيب الأعمدة في الشيت لا يهم.
- * - قوائم التقييم (Verdict / Info) تُقرأ من الـ Data validation الموجودة في الشيت،
- *   فلو عدّلت القائمة في الشيت تتعدل في الأداة تلقائياً.
+ * - قوائم التقييم (Verdict / Info) تُقرأ من الـ Data validation الموجودة في الشيت.
+ * - لما القرار يصير Approved أو Need fixing، يكتب التاريخ في عمود Date المخفي اللي بعد Info
+ *   (سكربت onEdit حقكم ما يشتغل لما الكتابة تجي من سكربت، فالأداة تكتبه بنفسها).
  * - كل حفظ يتحقق إن المنتج ما زال في نفس الصف وإنه ما زال مسنداً لنفس الموظف قبل الكتابة.
  * - LockService يمنع تداخل الكتابة إذا حفظ أكثر من موظف في نفس اللحظة.
- *
- * أول مرة: شغّل الدالة setup من المحرر (تضيف الأعمدة الناقصة وتولّد كلمة السر وتطبعها في السجل).
  */
 
 /* ===================== إعداد لمرة واحدة =====================
-   setup أول دالة في الملف، فتكون هي المختارة تلقائياً جنب زر Run */
-
-/**
- * شغّلها مرة من المحرر (اختر setup واضغط Run):
- *  - تضيف في آخر الشيت الأعمدة الناقصة: Quality Agent و Content Saved At و Quality Saved At
- *  - تولّد كلمة سر (API_KEY) لو ما فيه وحدة وتطبعها في Execution log
- */
-function setup() {
-  var sh = sheet_();
-  var header = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
-  var cols = columns_(header);
-  ["qAgent", "cSavedAt", "qSavedAt"].forEach(function (k) {
-    if (cols[k] >= 0) return;
-    var col = sh.getLastColumn() + 1;
-    sh.getRange(1, col).setValue(COLS[k]).setFontWeight("bold");
-    if (/SavedAt$/.test(k)) sh.getRange(2, col, Math.max(sh.getMaxRows() - 1, 1), 1).setNumberFormat("yyyy-mm-dd hh:mm");
-    Logger.log("أُضيف عمود: " + COLS[k]);
-  });
-
+   شغّل setupAudit مرة من المحرر: توافق على الصلاحيات، وتطبع أعمدة التاريخ اللي لقاها.
+   (أي دالة تشغّلها من المحرر، مثل doGet، تسوي نفس الشي.) */
+function setupAudit() {
   var props = PropertiesService.getScriptProperties();
   var key = props.getProperty("API_KEY");
   if (!key) {
     key = Utilities.getUuid().replace(/-/g, "").slice(0, 16);
     props.setProperty("API_KEY", key);
   }
-  Logger.log("API_KEY = " + key + "   ← انسخها وحطها في ملف index.html");
+  var cols = auditColumns_(auditSheet_().getRange(1, 1, 1, auditSheet_().getLastColumn()).getValues()[0]);
+  Logger.log("عمود تاريخ المحتوى: " + (cols.cDate >= 0 ? auditColName_(cols.cDate) : "غير موجود"));
+  Logger.log("عمود تاريخ الجودة: " + (cols.qDate >= 0 ? auditColName_(cols.qDate) : "غير موجود"));
+  Logger.log("API_KEY = " + key + "   (تحتاجها فقط لطريقة الملف المحلي)");
 }
 
-var SHEET_NAME = "Nutrition Validation"; // لو ما لقاه يستخدم أول ورقة
+function auditColName_(i) { var n = i + 1, s = ""; while (n) { s = String.fromCharCode(65 + (n - 1) % 26) + s; n = Math.floor((n - 1) / 26); } return s; }
 
-var COLS = {
+var AUDIT_SHEET_NAME = "Nutrition Validation"; // لو ما لقاه يستخدم أول ورقة
+
+var AUDIT_COLS = {
   code: "Master Product Code",
   old: "Old Nutrition Link",
   claude: "Claude Nutrition link",
@@ -52,27 +42,25 @@ var COLS = {
   cAgent: "Content Agent",
   cVerdict: "Content Verdict",
   cComments: "Content Comments",
-  cSavedAt: "Content Saved At",
   qAgent: "Quality Agent",
   qVerdict: "Quality Verdict",
   qComments: "Quality Comments",
-  qSavedAt: "Quality Saved At",
 };
 
-var DEFAULT_OPTIONS = {
+var AUDIT_DEFAULT_OPTIONS = {
   verdict: ["New", "Approved", "Need fixing"],
   info: ["Original Image Okay", "Gemni Correct ", "Claude Correct ", "None correct "],
 };
 
 /* القيم اللي تعني "لسه ما انقيّم" */
-var NOT_DONE = ["", "new"];
+var AUDIT_NOT_DONE = ["", "new"];
 
 /* ===================== قراءة ===================== */
 
 /* فتح رابط الـ Web App يعرض الأداة نفسها (ملف Index في نفس المشروع).
    والصفحة تكلم السكربت مباشرة عن طريق apiRead / apiSave، وتسجيل دخول الشركة هو الحماية. */
 function doGet(e) {
-  if (!e) return setup(); // تشغيل من المحرر بزر Run: يسوي الإعداد مهما كانت الدالة المختارة
+  if (!e) return setupAudit(); // تشغيل من المحرر بزر Run: يسوي الإعداد مهما كانت الدالة المختارة
   var p = e.parameter || {};
   if (!p.action) {
     return HtmlService.createHtmlOutputFromFile("Index")
@@ -80,29 +68,29 @@ function doGet(e) {
       .addMetaTag("viewport", "width=device-width, initial-scale=1");
   }
   // طريقة الملف المحلي (تحتاج نشر Anyone + كلمة سر)
-  try { checkSecret_(p.key); return out_(read_(p)); }
-  catch (err) { return out_({ ok: false, error: String(err.message || err) }); }
+  try { auditCheckSecret_(p.key); return auditOut_(auditRead_(p)); }
+  catch (err) { return auditOut_({ ok: false, error: String(err.message || err) }); }
 }
 
 function apiRead(p) {
-  try { return read_(p || {}); } catch (err) { return { ok: false, error: String(err.message || err) }; }
+  try { return auditRead_(p || {}); } catch (err) { return { ok: false, error: String(err.message || err) }; }
 }
 
 function apiSave(req) {
-  try { return saveAll_(req || {}); } catch (err) { return { ok: false, error: String(err.message || err) }; }
+  try { return auditSaveAll_(req || {}); } catch (err) { return { ok: false, error: String(err.message || err) }; }
 }
 
 function apiPing(p) {
-  try { return ping_(p || {}); } catch (err) { return { ok: false, error: String(err.message || err) }; }
+  try { return auditPing_(p || {}); } catch (err) { return { ok: false, error: String(err.message || err) }; }
 }
 
 /* ===================== المتصلون الآن =====================
    كل صفحة مفتوحة لها رقم خاص (client) وترسل نبضة كل 25 ثانية فيها: حساب قوقل اللي فاتحها،
    واسم الموظف اللي مختاره الحين، ورقم المنتج. لما ينتقل لاسم ثاني، يتحدث نفس السجل بدل ما ينضاف سجل جديد.
    كل شي في الذاكرة المؤقتة (CacheService)، ما يكتب في الشيت ولا ينتظر قفل الحفظ. */
-var ONLINE_MS = 60 * 1000;
+var AUDIT_ONLINE_MS = 60 * 1000;
 
-function ping_(p) {
+function auditPing_(p) {
   var email = "";
   try { email = Session.getActiveUser().getEmail() || ""; } catch (e) {}
   var cache = CacheService.getScriptCache();
@@ -111,10 +99,10 @@ function ping_(p) {
   if (lock.tryLock(3000)) {
     try {
       map = JSON.parse(cache.get("online") || "{}");
-      Object.keys(map).forEach(function (k) { if (now - map[k].t > ONLINE_MS) delete map[k]; });
+      Object.keys(map).forEach(function (k) { if (now - map[k].t > AUDIT_ONLINE_MS) delete map[k]; });
       if (p.client) {
         if (p.leave) delete map[p.client];
-        else map[p.client] = { t: now, email: email, agent: clean_(p.name || ""), role: p.role || "", pos: Number(p.pos) || 0, total: Number(p.total) || 0 };
+        else map[p.client] = { t: now, email: email, agent: auditClean_(p.name || ""), role: p.role || "", pos: Number(p.pos) || 0, total: Number(p.total) || 0 };
       }
       cache.put("online", JSON.stringify(map), 600);
     } finally {
@@ -127,33 +115,33 @@ function ping_(p) {
   var people = {};
   Object.keys(map).forEach(function (k) {
     var v = map[k];
-    if (now - v.t > ONLINE_MS) return;
+    if (now - v.t > AUDIT_ONLINE_MS) return;
     var id = v.email || "client:" + k;
     if (!people[id] || people[id].t < v.t) people[id] = v;
   });
   return { ok: true, me: email, online: Object.keys(people).map(function (k) { return people[k]; }) };
 }
 
-function read_(p) {
-  if (p.action === "ping") return ping_(p);
-  var sh = sheet_(), data = sh.getDataRange().getValues(), cols = columns_(data[0]);
-  if (p.action === "init") return init_(sh, data, cols);
-  if (p.action === "tasks") return tasks_(data, cols, p.agent, p.role);
+function auditRead_(p) {
+  if (p.action === "ping") return auditPing_(p);
+  var sh = auditSheet_(), data = sh.getDataRange().getValues(), cols = auditColumns_(data[0]);
+  if (p.action === "init") return auditInit_(sh, data, cols);
+  if (p.action === "tasks") return auditTasks_(data, cols, p.agent, p.role);
   throw new Error("unknown action");
 }
 
-function init_(sh, data, cols) {
+function auditInit_(sh, data, cols) {
   var agents = {};
   ["content", "quality"].forEach(function (role) {
-    var c = roleCols_(cols, role);
+    var c = auditRoleCols_(cols, role);
     if (c.agent < 0 || c.verdict < 0) return;
     for (var i = 1; i < data.length; i++) {
-      var name = clean_(data[i][c.agent]);
+      var name = auditClean_(data[i][c.agent]);
       if (!name) continue;
       var k = role + "|" + name;
       var a = agents[k] || (agents[k] = { name: name, role: role, total: 0, done: 0 });
       a.total++;
-      if (isDone_(data[i][c.verdict])) a.done++;
+      if (auditIsDone_(data[i][c.verdict])) a.done++;
     }
   });
   var list = Object.keys(agents).map(function (k) { return agents[k]; });
@@ -162,30 +150,30 @@ function init_(sh, data, cols) {
     ok: true,
     title: SpreadsheetApp.getActiveSpreadsheet().getName(),
     agents: list,
-    options: { content: options_(sh, cols, "content"), quality: options_(sh, cols, "quality") },
-    missing: Object.keys(COLS).filter(function (k) { return cols[k] < 0 && !/SavedAt$/.test(k); }).map(function (k) { return [].concat(COLS[k])[0]; }),
+    options: { content: auditOptions_(sh, cols, "content"), quality: auditOptions_(sh, cols, "quality") },
+    missing: Object.keys(AUDIT_COLS).filter(function (k) { return cols[k] < 0; }).map(function (k) { return [].concat(AUDIT_COLS[k])[0]; }),
   };
 }
 
-function tasks_(data, cols, agent, role) {
-  var c = roleCols_(cols, role);
-  if (c.agent < 0) throw new Error("عمود " + (role === "quality" ? COLS.qAgent : COLS.cAgent) + " غير موجود في الشيت");
-  agent = clean_(agent);
+function auditTasks_(data, cols, agent, role) {
+  var c = auditRoleCols_(cols, role);
+  if (c.agent < 0) throw new Error("عمود " + (role === "quality" ? AUDIT_COLS.qAgent : AUDIT_COLS.cAgent) + " غير موجود في الشيت");
+  agent = auditClean_(agent);
   var tasks = [];
   for (var i = 1; i < data.length; i++) {
     var r = data[i];
-    if (clean_(r[c.agent]) !== agent) continue;
+    if (auditClean_(r[c.agent]) !== agent) continue;
     tasks.push({
       row: i + 1,
-      code: str_(r[cols.code]),
-      old: str_(r[cols.old]).trim(),
-      claude: str_(r[cols.claude]).trim(),
-      gemini: str_(r[cols.gemini]).trim(),
-      aiDecision: str_(r[cols.aiDecision]),
-      aiComment: str_(r[cols.aiComment]),
-      verdict: str_(r[c.verdict]),
-      info: str_(r[c.info]),
-      comments: str_(r[c.comments]),
+      code: auditStr_(r[cols.code]),
+      old: auditStr_(r[cols.old]).trim(),
+      claude: auditStr_(r[cols.claude]).trim(),
+      gemini: auditStr_(r[cols.gemini]).trim(),
+      aiDecision: auditStr_(r[cols.aiDecision]),
+      aiComment: auditStr_(r[cols.aiComment]),
+      verdict: auditStr_(r[c.verdict]),
+      info: auditStr_(r[c.info]),
+      comments: auditStr_(r[c.comments]),
     });
   }
   return { ok: true, tasks: tasks };
@@ -194,22 +182,22 @@ function tasks_(data, cols, agent, role) {
 /* ===================== حفظ ===================== */
 
 function doPost(e) {
-  if (!e) return setup();
+  if (!e) return setupAudit();
   var req;
-  try { req = JSON.parse(e.postData.contents); } catch (err) { return out_({ ok: false, error: "bad request" }); }
-  try { checkSecret_(req.key); return out_(saveAll_(req)); }
-  catch (err) { return out_({ ok: false, error: String(err.message || err) }); }
+  try { req = JSON.parse(e.postData.contents); } catch (err) { return auditOut_({ ok: false, error: "bad request" }); }
+  try { auditCheckSecret_(req.key); return auditOut_(auditSaveAll_(req)); }
+  catch (err) { return auditOut_({ ok: false, error: String(err.message || err) }); }
 }
 
-function saveAll_(req) {
+function auditSaveAll_(req) {
   if (req.action !== "save" || !req.updates || !req.updates.length) return { ok: false, error: "nothing to save" };
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    var sh = sheet_(), cols = columns_(sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0]);
-    var opts = { content: options_(sh, cols, "content"), quality: options_(sh, cols, "quality") };
+    var sh = auditSheet_(), cols = auditColumns_(sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0]);
+    var opts = { content: auditOptions_(sh, cols, "content"), quality: auditOptions_(sh, cols, "quality") };
     var results = req.updates.map(function (u) {
-      try { return save_(sh, cols, opts, u); } catch (err) { return { id: u.id, ok: false, error: String(err.message || err) }; }
+      try { return auditSave_(sh, cols, opts, u); } catch (err) { return { id: u.id, ok: false, error: String(err.message || err) }; }
     });
     SpreadsheetApp.flush();
     return { ok: true, results: results };
@@ -218,14 +206,14 @@ function saveAll_(req) {
   }
 }
 
-function save_(sh, cols, opts, u) {
+function auditSave_(sh, cols, opts, u) {
   var role = u.role === "quality" ? "quality" : "content";
-  var c = roleCols_(cols, role);
-  var row = findRow_(sh, cols, Number(u.row), str_(u.code));
+  var c = auditRoleCols_(cols, role);
+  var row = auditFindRow_(sh, cols, Number(u.row), auditStr_(u.code));
   if (!row) return { id: u.id, ok: false, code: "gone", error: "المنتج " + u.code + " لم يعد موجودا في الشيت" };
 
-  var assigned = clean_(sh.getRange(row, c.agent + 1).getValue());
-  if (assigned !== clean_(u.agent)) {
+  var assigned = auditClean_(sh.getRange(row, c.agent + 1).getValue());
+  if (assigned !== auditClean_(u.agent)) {
     return { id: u.id, ok: false, code: "reassigned", assigned: assigned, error: "المنتج " + u.code + " أصبح مسندا إلى " + (assigned || "لا أحد"), reassigned: true };
   }
 
@@ -233,6 +221,8 @@ function save_(sh, cols, opts, u) {
   if ("verdict" in f) {
     if (f.verdict !== "" && opts[role].verdict.indexOf(f.verdict) < 0) throw new Error("قيمة Verdict غير مسموحة: " + f.verdict);
     sh.getRange(row, c.verdict + 1).setValue(f.verdict);
+    // نفس قاعدة سكربت الشيت: سكربت onEdit ما يشتغل لما الكتابة تجي من سكربت، فالأداة تكتب التاريخ بنفسها
+    if (auditIsDone_(f.verdict) && c.date >= 0) sh.getRange(row, c.date + 1).setValue(new Date());
   }
   if ("info" in f && c.info >= 0) {
     if (f.info !== "" && opts[role].info.indexOf(f.info) < 0) throw new Error("قيمة Info غير مسموحة: " + f.info);
@@ -243,14 +233,13 @@ function save_(sh, cols, opts, u) {
     if (/^[=+\-@]/.test(text)) text = "'" + text; // نص عادي، مو معادلة
     sh.getRange(row, c.comments + 1).setValue(text);
   }
-  if (c.savedAt >= 0) sh.getRange(row, c.savedAt + 1).setValue(new Date());
   return { id: u.id, ok: true, row: row };
 }
 
 /* الصف المتوقع لو ما زال فيه نفس المنتج، وإلا نبحث عن الكود (لو المشرف رتّب أو أضاف صفوف) */
-function findRow_(sh, cols, row, code) {
+function auditFindRow_(sh, cols, row, code) {
   if (!code) return 0;
-  if (row >= 2 && row <= sh.getLastRow() && str_(sh.getRange(row, cols.code + 1).getValue()).trim() === code.trim()) return row;
+  if (row >= 2 && row <= sh.getLastRow() && auditStr_(sh.getRange(row, cols.code + 1).getValue()).trim() === code.trim()) return row;
   var hit = sh.getRange(2, cols.code + 1, Math.max(sh.getLastRow() - 1, 1), 1)
     .createTextFinder(code.trim()).matchEntireCell(true).findNext();
   return hit ? hit.getRow() : 0;
@@ -258,39 +247,44 @@ function findRow_(sh, cols, row, code) {
 
 /* ===================== أعمدة وقوائم ===================== */
 
-function columns_(header) {
-  var norm = header.map(norm_);
+function auditColumns_(header) {
+  var norm = header.map(auditNorm_);
   var cols = {};
-  Object.keys(COLS).forEach(function (k) {
+  Object.keys(AUDIT_COLS).forEach(function (k) {
     cols[k] = -1;
-    [].concat(COLS[k]).some(function (name) { cols[k] = norm.indexOf(norm_(name)); return cols[k] >= 0; });
+    [].concat(AUDIT_COLS[k]).some(function (name) { cols[k] = norm.indexOf(auditNorm_(name)); return cols[k] >= 0; });
   });
   // يوجد عمودان باسم Info: كل واحد يتبع عمود الـ Verdict اللي قبله
-  cols.cInfo = infoAfter_(norm, cols.cVerdict, cols.cComments);
-  cols.qInfo = infoAfter_(norm, cols.qVerdict, cols.qComments);
+  cols.cInfo = auditInfoAfter_(norm, cols.cVerdict, cols.cComments);
+  cols.qInfo = auditInfoAfter_(norm, cols.qVerdict, cols.qComments);
+  // وعمود Date المخفي اللي بعده: ينكتب فيه التاريخ لما القرار يصير Approved أو Need fixing
+  cols.cDate = auditHeaderAfter_(norm, "date", cols.cVerdict, cols.cComments);
+  cols.qDate = auditHeaderAfter_(norm, "date", cols.qVerdict, cols.qComments);
   return cols;
 }
 
-function infoAfter_(norm, verdictCol, commentsCol) {
+function auditInfoAfter_(norm, verdictCol, commentsCol) { return auditHeaderAfter_(norm, "info", verdictCol, commentsCol); }
+
+function auditHeaderAfter_(norm, name, verdictCol, commentsCol) {
   if (verdictCol < 0) return -1;
   var end = commentsCol > verdictCol ? commentsCol : norm.length;
-  for (var i = verdictCol + 1; i < end; i++) if (norm[i] === "info") return i;
+  for (var i = verdictCol + 1; i < end; i++) if (norm[i] === name) return i;
   return -1;
 }
 
-function roleCols_(cols, role) {
+function auditRoleCols_(cols, role) {
   return role === "quality"
-    ? { agent: cols.qAgent, verdict: cols.qVerdict, info: cols.qInfo, comments: cols.qComments, savedAt: cols.qSavedAt }
-    : { agent: cols.cAgent, verdict: cols.cVerdict, info: cols.cInfo, comments: cols.cComments, savedAt: cols.cSavedAt };
+    ? { agent: cols.qAgent, verdict: cols.qVerdict, info: cols.qInfo, comments: cols.qComments, date: cols.qDate }
+    : { agent: cols.cAgent, verdict: cols.cVerdict, info: cols.cInfo, comments: cols.cComments, date: cols.cDate };
 }
 
-function options_(sh, cols, role) {
-  var c = roleCols_(cols, role);
-  return { verdict: listIn_(sh, c.verdict) || DEFAULT_OPTIONS.verdict, info: listIn_(sh, c.info) || DEFAULT_OPTIONS.info };
+function auditOptions_(sh, cols, role) {
+  var c = auditRoleCols_(cols, role);
+  return { verdict: auditListIn_(sh, c.verdict) || AUDIT_DEFAULT_OPTIONS.verdict, info: auditListIn_(sh, c.info) || AUDIT_DEFAULT_OPTIONS.info };
 }
 
 /* يقرأ قائمة الخيارات من الـ Data validation في الصف 2 */
-function listIn_(sh, col) {
+function auditListIn_(sh, col) {
   if (col < 0 || sh.getLastRow() < 2) return null;
   var rule = sh.getRange(2, col + 1).getDataValidation();
   if (!rule || rule.getCriteriaType() !== SpreadsheetApp.DataValidationCriteria.VALUE_IN_LIST) return null;
@@ -300,22 +294,22 @@ function listIn_(sh, col) {
 
 /* ===================== أدوات ===================== */
 
-function checkSecret_(key) {
+function auditCheckSecret_(key) {
   var expected = PropertiesService.getScriptProperties().getProperty("API_KEY");
   if (!expected) throw new Error("setup: شغّل الدالة setup مرة من المحرر أولاً");
   if (key !== expected) throw new Error("كلمة السر (API_KEY) غير صحيحة");
 }
 
-function sheet_() {
+function auditSheet_() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  return ss.getSheetByName(SHEET_NAME) || ss.getSheets()[0];
+  return ss.getSheetByName(AUDIT_SHEET_NAME) || ss.getSheets()[0];
 }
 
-function isDone_(v) { return NOT_DONE.indexOf(clean_(v).toLowerCase()) < 0; }
-function norm_(s) { return String(s).replace(/\s+/g, " ").trim().toLowerCase(); }
-function clean_(s) { return String(s == null ? "" : s).replace(/\s+/g, " ").trim(); }
-function str_(v) { return v == null ? "" : String(v); }
+function auditIsDone_(v) { return AUDIT_NOT_DONE.indexOf(auditClean_(v).toLowerCase()) < 0; }
+function auditNorm_(s) { return String(s).replace(/\s+/g, " ").trim().toLowerCase(); }
+function auditClean_(s) { return String(s == null ? "" : s).replace(/\s+/g, " ").trim(); }
+function auditStr_(v) { return v == null ? "" : String(v); }
 
-function out_(o) {
+function auditOut_(o) {
   return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
 }
