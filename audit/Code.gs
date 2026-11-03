@@ -11,6 +11,35 @@
  * أول مرة: شغّل الدالة setup من المحرر (تضيف الأعمدة الناقصة وتولّد كلمة السر وتطبعها في السجل).
  */
 
+/* ===================== إعداد لمرة واحدة =====================
+   setup أول دالة في الملف، فتكون هي المختارة تلقائياً جنب زر Run */
+
+/**
+ * شغّلها مرة من المحرر (اختر setup واضغط Run):
+ *  - تضيف في آخر الشيت الأعمدة الناقصة: Quality Agent و Content Saved At و Quality Saved At
+ *  - تولّد كلمة سر (API_KEY) لو ما فيه وحدة وتطبعها في Execution log
+ */
+function setup() {
+  var sh = sheet_();
+  var header = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+  var cols = columns_(header);
+  ["qAgent", "cSavedAt", "qSavedAt"].forEach(function (k) {
+    if (cols[k] >= 0) return;
+    var col = sh.getLastColumn() + 1;
+    sh.getRange(1, col).setValue(COLS[k]).setFontWeight("bold");
+    if (/SavedAt$/.test(k)) sh.getRange(2, col, Math.max(sh.getMaxRows() - 1, 1), 1).setNumberFormat("yyyy-mm-dd hh:mm");
+    Logger.log("أُضيف عمود: " + COLS[k]);
+  });
+
+  var props = PropertiesService.getScriptProperties();
+  var key = props.getProperty("API_KEY");
+  if (!key) {
+    key = Utilities.getUuid().replace(/-/g, "").slice(0, 16);
+    props.setProperty("API_KEY", key);
+  }
+  Logger.log("API_KEY = " + key + "   ← انسخها وحطها في ملف index.html");
+}
+
 var SHEET_NAME = "Nutrition Validation"; // لو ما لقاه يستخدم أول ورقة
 
 var COLS = {
@@ -207,34 +236,6 @@ function listIn_(sh, col) {
   if (!rule || rule.getCriteriaType() !== SpreadsheetApp.DataValidationCriteria.VALUE_IN_LIST) return null;
   var values = rule.getCriteriaValues()[0];
   return values && values.length ? values.map(String) : null;
-}
-
-/* ===================== إعداد لمرة واحدة ===================== */
-
-/**
- * شغّلها مرة من المحرر (اختر setup واضغط Run):
- *  - تضيف في آخر الشيت الأعمدة الناقصة: Quality Agent و Content Saved At و Quality Saved At
- *  - تولّد كلمة سر (API_KEY) لو ما فيه وحدة وتطبعها في Execution log
- */
-function setup() {
-  var sh = sheet_();
-  var header = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
-  var cols = columns_(header);
-  ["qAgent", "cSavedAt", "qSavedAt"].forEach(function (k) {
-    if (cols[k] >= 0) return;
-    var col = sh.getLastColumn() + 1;
-    sh.getRange(1, col).setValue(COLS[k]).setFontWeight("bold");
-    if (/SavedAt$/.test(k)) sh.getRange(2, col, Math.max(sh.getMaxRows() - 1, 1), 1).setNumberFormat("yyyy-mm-dd hh:mm");
-    Logger.log("أُضيف عمود: " + COLS[k]);
-  });
-
-  var props = PropertiesService.getScriptProperties();
-  var key = props.getProperty("API_KEY");
-  if (!key) {
-    key = Utilities.getUuid().replace(/-/g, "").slice(0, 16);
-    props.setProperty("API_KEY", key);
-  }
-  Logger.log("API_KEY = " + key + "   ← انسخها وحطها في ملف index.html");
 }
 
 /* ===================== أدوات ===================== */
