@@ -6,7 +6,7 @@
 <title>تدقيق الصور - Local Shop</title>
 <style>
 :root{--bg:#fdfaf4;--card:#fff;--line:#eee5d6;--text:#4a2617;--muted:#8b7666;--yellow:#ffd400;--yellowd:#e8b800;
-  --green:#1f8a4c;--greenbg:#e7f6ed;--red:#c0392b;--redbg:#fdecea;--blue:#2563eb;--bluebg:#eaf1ff}
+  --green:#1f8a4c;--greenbg:#e7f6ed;--red:#c0392b;--redbg:#fdecea;--blue:#2563eb;--bluebg:#eaf1ff;--orange:#d9600b;--orangebg:#fff0e3}
 *{box-sizing:border-box}
 html,body{margin:0}
 body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Tahoma,Arial,sans-serif;font-size:15px;border-top:5px solid var(--yellow);min-height:100vh}
@@ -87,13 +87,20 @@ kbd{display:inline-block;min-width:18px;padding:0 5px;border:1px solid #dccfbb;b
 .chip[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellowd);box-shadow:0 2px 0 var(--yellowd)}
 .chip[data-tone="good"][aria-pressed="true"]{background:var(--greenbg);border-color:var(--green);box-shadow:0 2px 0 var(--green);color:var(--green)}
 .chip[data-tone="bad"][aria-pressed="true"]{background:var(--redbg);border-color:var(--red);box-shadow:0 2px 0 var(--red);color:var(--red)}
+/* ألوان خيارات Info: Original أخضر، Claude برتقالي، Gemini أزرق، None أحمر */
+.chip[data-tone="original"]{--c:var(--green);--cb:var(--greenbg)}
+.chip[data-tone="claude"]{--c:var(--orange);--cb:var(--orangebg)}
+.chip[data-tone="gemini"]{--c:var(--blue);--cb:var(--bluebg)}
+.chip[data-tone="none"]{--c:var(--red);--cb:var(--redbg)}
+.chip[data-tone="original"],.chip[data-tone="claude"],.chip[data-tone="gemini"],.chip[data-tone="none"]{border-left:5px solid var(--c);color:var(--c)}
+.chip[data-tone="original"][aria-pressed="true"],.chip[data-tone="claude"][aria-pressed="true"],.chip[data-tone="gemini"][aria-pressed="true"],.chip[data-tone="none"][aria-pressed="true"]{background:var(--c);border-color:var(--c);box-shadow:0 2px 0 rgba(0,0,0,.18);color:#fff}
+.chip[aria-pressed="true"] kbd{background:rgba(255,255,255,.85)}
 textarea{width:100%;height:96px;resize:vertical;background:#fff;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px;font:14px/1.5 inherit;font-family:inherit}
 textarea:focus,.setup input:focus,.jump input:focus{outline:2px solid var(--yellow);outline-offset:-1px}
 .nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
 .nav .wide{grid-column:1/-1}
 .jump{display:flex;gap:6px;margin-top:12px}
 .jump input{flex:1;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:999px;font:13px Consolas,monospace;direction:ltr}
-.keys{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:12px;color:var(--muted);line-height:2}
 
 /* الصور */
 .ai{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:14px}
@@ -105,7 +112,10 @@ textarea:focus,.setup input:focus,.jump input:focus{outline:2px solid var(--yell
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 1px 2px rgba(74,38,23,.04);min-width:0}
 .card.pick{border-color:var(--green);box-shadow:0 0 0 2px var(--greenbg)}
 .card h4{margin:0 0 10px;font-size:14px;color:var(--muted);display:flex;align-items:center;gap:8px}
-.card h4::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--yellow)}
+.card h4::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--yellow)}
+.card[data-img="old"] h4::before{background:var(--green)}
+.card[data-img="claude"] h4::before{background:var(--orange)}
+.card[data-img="gemini"] h4::before{background:var(--blue)}
 .card h4 .badge{margin-inline-start:auto;font-size:11px;color:var(--green);background:var(--greenbg);padding:2px 8px;border-radius:99px}
 .frame{display:block;border-radius:8px;border:1px solid #f0e9df;background:#faf7f2;min-height:160px;cursor:zoom-in;overflow:hidden;position:relative}
 .frame:hover{border-color:var(--yellowd)}
@@ -146,7 +156,6 @@ textarea:focus,.setup input:focus,.jump input:focus{outline:2px solid var(--yell
   .eval{grid-template-columns:1fr}
   .form{position:static;max-height:none}
   .images{grid-template-columns:1fr}
-  .keys{display:none}
 }
 </style>
 </head>
@@ -208,7 +217,6 @@ textarea:focus,.setup input:focus,.jump input:focus{outline:2px solid var(--yell
         <input id="inJump" placeholder="رقم أو كود المنتج">
         <button class="btn" type="submit">انتقال</button>
       </form>
-      <div class="keys" id="keys"></div>
     </aside>
 
     <section>
@@ -460,7 +468,14 @@ async function flushNow() {
 
 /* ---------------- العرض ---------------- */
 function isDone(v) { const s = String(v || "").trim().toLowerCase(); return s !== "" && s !== "new"; }
-function tone(v) { const s = v.toLowerCase(); return /approved|correct|okay/.test(s) && !/none/.test(s) ? "good" : /fix|none|reject/.test(s) ? "bad" : ""; }
+function tone(v) {
+  const s = v.toLowerCase();
+  if (/none/.test(s)) return "none";
+  if (/gem/.test(s)) return "gemini";
+  if (/claude/.test(s)) return "claude";
+  if (/original/.test(s)) return "original";
+  return /approved/.test(s) ? "good" : /fix|reject/.test(s) ? "bad" : "";
+}
 
 function buildChips() {
   let n = 1;
@@ -480,7 +495,6 @@ function buildChips() {
   };
   make($("verdicts"), options.cur.verdict, "verdict");
   make($("infos"), options.cur.info, "info");
-  $("keys").innerHTML = "اختصارات: <kbd>1</kbd>–<kbd>" + (n - 1) + "</kbd> اختيار &nbsp; <kbd>←</kbd> التالي &nbsp; <kbd>→</kbd> السابق<br><kbd>N</kbd> التالي غير المُقيَّم &nbsp; <kbd>C</kbd> الملاحظات &nbsp; <kbd>Z</kbd> تكبير الصور<br><kbd>Esc</kbd> خروج من الكتابة";
 }
 
 function pickChip(field, v, toggle) {
