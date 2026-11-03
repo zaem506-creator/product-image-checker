@@ -92,7 +92,38 @@ function apiSave(req) {
   try { return saveAll_(req || {}); } catch (err) { return { ok: false, error: String(err.message || err) }; }
 }
 
+function apiPing(p) {
+  try { return ping_(p || {}); } catch (err) { return { ok: false, error: String(err.message || err) }; }
+}
+
+/* ===================== المتصلون الآن =====================
+   كل صفحة مفتوحة ترسل نبضة كل 30 ثانية فيها اسم الموظف ورقم المنتج اللي واقف عليه.
+   تنحفظ في الذاكرة المؤقتة (CacheService) لمدة دقيقتين، وما تكتب في الشيت ولا تنتظر القفل. */
+var ONLINE_MS = 75 * 1000;
+
+function ping_(p) {
+  var cache = CacheService.getScriptCache();
+  if (p.name && p.role) {
+    var email = "";
+    try { email = Session.getActiveUser().getEmail(); } catch (e) {}
+    cache.put("p|" + p.role + "|" + clean_(p.name), JSON.stringify({ t: Date.now(), pos: Number(p.pos) || 0, total: Number(p.total) || 0, email: email }), 120);
+  }
+  var names = [];
+  try { names = JSON.parse(p.names || "[]"); } catch (e) {}
+  var keys = names.slice(0, 100).map(function (k) { return "p|" + k; });
+  var got = keys.length ? cache.getAll(keys) : {};
+  var now = Date.now(), online = [];
+  Object.keys(got).forEach(function (k) {
+    var v = JSON.parse(got[k]);
+    if (now - v.t > ONLINE_MS) return;
+    var parts = k.split("|");
+    online.push({ role: parts[1], name: parts.slice(2).join("|"), pos: v.pos, total: v.total, email: v.email });
+  });
+  return { ok: true, online: online };
+}
+
 function read_(p) {
+  if (p.action === "ping") return ping_(p);
   var sh = sheet_(), data = sh.getDataRange().getValues(), cols = columns_(data[0]);
   if (p.action === "init") return init_(sh, data, cols);
   if (p.action === "tasks") return tasks_(data, cols, p.agent, p.role);
@@ -179,11 +210,11 @@ function save_(sh, cols, opts, u) {
   var role = u.role === "quality" ? "quality" : "content";
   var c = roleCols_(cols, role);
   var row = findRow_(sh, cols, Number(u.row), str_(u.code));
-  if (!row) return { id: u.id, ok: false, error: "المنتج " + u.code + " لم يعد موجوداً في الشيت" };
+  if (!row) return { id: u.id, ok: false, code: "gone", error: "المنتج " + u.code + " لم يعد موجودا في الشيت" };
 
   var assigned = clean_(sh.getRange(row, c.agent + 1).getValue());
   if (assigned !== clean_(u.agent)) {
-    return { id: u.id, ok: false, error: "المنتج " + u.code + " صار مسنداً إلى " + (assigned || "لا أحد"), reassigned: true };
+    return { id: u.id, ok: false, code: "reassigned", assigned: assigned, error: "المنتج " + u.code + " أصبح مسندا إلى " + (assigned || "لا أحد"), reassigned: true };
   }
 
   var f = u.fields || {};

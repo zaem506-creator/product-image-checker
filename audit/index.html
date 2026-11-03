@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>تدقيق الصور - Local Shop</title>
+<title>Image Audit - Local Shop</title>
 <style>
 :root{--bg:#fdfaf4;--card:#fff;--line:#eee5d6;--text:#4a2617;--muted:#8b7666;--yellow:#ffd400;--yellowd:#e8b800;
   --green:#1f8a4c;--greenbg:#e7f6ed;--red:#c0392b;--redbg:#fdecea;--blue:#2563eb;--bluebg:#eaf1ff;--orange:#d9600b;--orangebg:#fff0e3}
@@ -17,7 +17,7 @@ kbd{display:inline-block;min-width:18px;padding:0 5px;border:1px solid #dccfbb;b
 
 /* الشريط العلوي */
 .top{background:#fffdf9;border-bottom:1px solid var(--line);box-shadow:0 1px 3px rgba(74,38,23,.05);position:sticky;top:0;z-index:20}
-.bar{max-width:1600px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bar{max-width:1600px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .brand b{display:block;font-size:16px;line-height:1.2}
 .brand span{display:block;font-size:11.5px;color:var(--muted)}
 .spacer{flex:1}
@@ -28,17 +28,20 @@ kbd{display:inline-block;min-width:18px;padding:0 5px;border:1px solid #dccfbb;b
 .status.saved{background:var(--greenbg);color:var(--green)}
 .status.error{background:var(--redbg);color:var(--red)}
 @keyframes pulse{50%{opacity:.25}}
+.online{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted);white-space:nowrap}
+.online i{display:inline-flex;align-items:center;gap:5px;font-style:normal;background:var(--greenbg);color:var(--green);padding:3px 9px;border-radius:999px;font-size:12.5px}
+.online i::before,.dot{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 2px rgba(31,138,76,.18)}
 .btn{background:#fffdf9;color:#3b2417;border:1px solid #e8dfd2;border-radius:999px;padding:8px 16px;font-weight:700;font-size:14px;cursor:pointer;
   box-shadow:0 1px 2px rgba(74,38,23,.05);white-space:nowrap}
 .btn:hover{background:#fbf5ea;border-color:#dccfbb}
 .btn:disabled{opacity:.45;cursor:default}
 .btn.primary{background:var(--yellow);border-color:var(--yellowd)}
 .btn.primary:hover{background:var(--yellowd)}
-.btn.icon{padding:8px 11px}
+.btn.icon{padding:8px 12px}
 
 /* أسماء الموظفين */
 .tabs{max-width:1600px;margin:0 auto;padding:0 16px 10px;display:flex;gap:6px;flex-wrap:wrap}
-.tab{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:6px 8px 6px 14px;
+.tab{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:6px 14px;
   font-weight:700;font-size:14px;cursor:pointer;transition:.15s}
 .tab:hover{background:#f7efe0;color:var(--text)}
 .tab small{font-weight:600;font-size:11px;padding:2px 7px;border-radius:999px;background:#f5efe4}
@@ -47,7 +50,7 @@ kbd{display:inline-block;min-width:18px;padding:0 5px;border:1px solid #dccfbb;b
 .tab[aria-selected="true"] small{background:rgba(255,255,255,.6)}
 .tab.complete .count{color:var(--green)}
 
-.stage{max-width:1600px;margin:0 auto;padding:18px 16px 40px}
+.stage{max-width:1600px;margin:0 auto;padding:16px 16px 40px}
 
 /* رسائل */
 .notice{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:40px 20px;text-align:center;color:var(--muted)}
@@ -63,47 +66,50 @@ kbd{display:inline-block;min-width:18px;padding:0 5px;border:1px solid #dccfbb;b
 .setup input{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;font:14px Consolas,monospace;direction:ltr}
 .setup .row{display:flex;gap:10px;margin-top:18px}
 
-/* التقييم */
-.eval{display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start}
-.form{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 1px 2px rgba(74,38,23,.04);
-  position:sticky;top:var(--stick,120px);max-height:calc(100vh - var(--stick,120px) - 12px);overflow:auto}
-.head{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line)}
-.head h3{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:8px}
-.code{display:flex;align-items:center;gap:6px;font:600 13px Consolas,monospace;direction:ltr;justify-content:flex-end}
-.code button{border:0;background:#f5efe4;border-radius:6px;cursor:pointer;font-size:12px;padding:3px 7px;color:var(--muted)}
-.progress{margin-top:10px;font-size:13px;color:var(--muted);display:flex;justify-content:space-between}
-.progress b{color:var(--text)}
-.pbar{height:6px;background:#f2eadc;border-radius:99px;overflow:hidden;margin-top:6px}
+/* التقييم: اللوحة الجانبية بطول الشاشة بالضبط، وخانة الملاحظات تاخذ الباقي، فما تحتاج سكرول */
+.eval{display:grid;grid-template-columns:330px 1fr;gap:18px;align-items:start}
+.form{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 1px 2px rgba(74,38,23,.04);
+  position:sticky;top:var(--stick,120px);height:calc(100vh - var(--stick,120px) - 12px);min-height:430px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+.head{padding-bottom:10px;border-bottom:1px solid var(--line)}
+.head h3{margin:0 0 4px;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.code{display:flex;align-items:center;gap:6px;font:600 12.5px Consolas,monospace;direction:ltr;justify-content:flex-end}
+.code button{border:0;background:#f5efe4;border-radius:6px;cursor:pointer;font-size:11.5px;padding:2px 7px;color:var(--muted)}
+.progress{margin-top:6px;font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between}
+.pbar{height:5px;background:#f2eadc;border-radius:99px;overflow:hidden;margin-top:5px}
 .pbar i{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
 .rowstate{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:#f5efe4;color:var(--muted)}
 .rowstate.done{background:var(--greenbg);color:var(--green)}
 
-.group{margin-bottom:14px}
-.group>label{display:block;font-weight:700;margin-bottom:7px;font-size:13.5px}
-.chips{display:flex;flex-direction:column;gap:6px}
-.chip{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:start;border:1px solid var(--line);background:#fff;
-  border-radius:9px;padding:9px 11px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;transition:.12s;direction:ltr}
+.group>label{display:block;font-weight:700;margin-bottom:5px;font-size:13px}
+.chips{display:flex;flex-direction:column;gap:5px}
+.chips.row{flex-direction:row}
+.chips.row .chip{flex:1;justify-content:center;padding:7px 6px}
+.chip{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;text-align:start;border:1px solid var(--line);background:#fff;
+  border-radius:9px;padding:7px 10px;font-size:13.5px;font-weight:600;color:var(--text);cursor:pointer;transition:.12s;direction:ltr;white-space:nowrap}
 .chip:hover{border-color:#dccfbb;background:#fffcf5}
 .chip[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellowd);box-shadow:0 2px 0 var(--yellowd)}
 .chip[data-tone="good"][aria-pressed="true"]{background:var(--greenbg);border-color:var(--green);box-shadow:0 2px 0 var(--green);color:var(--green)}
 .chip[data-tone="bad"][aria-pressed="true"]{background:var(--redbg);border-color:var(--red);box-shadow:0 2px 0 var(--red);color:var(--red)}
 /* ألوان خيارات Info: Original أخضر، Claude برتقالي، Gemini أزرق، None أحمر */
-.chip[data-tone="original"]{--c:var(--green);--cb:var(--greenbg)}
-.chip[data-tone="claude"]{--c:var(--orange);--cb:var(--orangebg)}
-.chip[data-tone="gemini"]{--c:var(--blue);--cb:var(--bluebg)}
-.chip[data-tone="none"]{--c:var(--red);--cb:var(--redbg)}
+.chip[data-tone="original"]{--c:var(--green)}
+.chip[data-tone="claude"]{--c:var(--orange)}
+.chip[data-tone="gemini"]{--c:var(--blue)}
+.chip[data-tone="none"]{--c:var(--red)}
 .chip[data-tone="original"],.chip[data-tone="claude"],.chip[data-tone="gemini"],.chip[data-tone="none"]{border-left:5px solid var(--c);color:var(--c)}
 .chip[data-tone="original"][aria-pressed="true"],.chip[data-tone="claude"][aria-pressed="true"],.chip[data-tone="gemini"][aria-pressed="true"],.chip[data-tone="none"][aria-pressed="true"]{background:var(--c);border-color:var(--c);box-shadow:0 2px 0 rgba(0,0,0,.18);color:#fff}
+.chip kbd{min-width:16px;font-size:10px;line-height:14px}
 .chip[aria-pressed="true"] kbd{background:rgba(255,255,255,.85)}
-textarea{width:100%;height:96px;resize:vertical;background:#fff;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px;font:14px/1.5 inherit;font-family:inherit}
+.notes{flex:1;display:flex;flex-direction:column;min-height:72px}
+textarea{flex:1;width:100%;min-height:44px;resize:none;background:#fff;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:9px;font:14px/1.5 inherit;font-family:inherit}
 textarea:focus,.setup input:focus,.jump input:focus{outline:2px solid var(--yellow);outline-offset:-1px}
-.nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
-.nav .wide{grid-column:1/-1}
-.jump{display:flex;gap:6px;margin-top:12px}
-.jump input{flex:1;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:999px;font:13px Consolas,monospace;direction:ltr}
+.nav{display:grid;grid-template-columns:auto 1fr auto;gap:6px}
+.nav .btn{padding:7px 10px;font-size:13.5px}
+.jump{display:flex;gap:6px}
+.jump input{flex:1;min-width:0;padding:6px 10px;border:1px solid var(--line);border-radius:999px;font:12.5px Consolas,monospace;direction:ltr}
+.jump .btn{padding:6px 12px;font-size:13px}
 
 /* الصور */
-.ai{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:14px}
+.ai{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:12px;font-size:14px}
 .ai .tag{flex:none;font-weight:700;font-size:13px;padding:4px 10px;border-radius:99px;background:#f5efe4;direction:ltr}
 .ai .tag.good{background:var(--greenbg);color:var(--green)}
 .ai .tag.bad{background:var(--redbg);color:var(--red)}
@@ -112,7 +118,7 @@ textarea:focus,.setup input:focus,.jump input:focus{outline:2px solid var(--yell
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 1px 2px rgba(74,38,23,.04);min-width:0}
 .card.pick{border-color:var(--green);box-shadow:0 0 0 2px var(--greenbg)}
 .card h4{margin:0 0 10px;font-size:14px;color:var(--muted);display:flex;align-items:center;gap:8px}
-.card h4::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--yellow)}
+.card h4::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--yellow);flex:none}
 .card[data-img="old"] h4::before{background:var(--green)}
 .card[data-img="claude"] h4::before{background:var(--orange)}
 .card[data-img="gemini"] h4::before{background:var(--blue)}
@@ -144,17 +150,28 @@ textarea:focus,.setup input:focus,.jump input:focus{outline:2px solid var(--yell
 .lb-btn:hover{background:#4a372b}
 .lb-stage{flex:1;position:relative;overflow:hidden;cursor:grab;touch-action:none;background:#fff}
 .lb-stage.drag{cursor:grabbing}
-.lb-stage img{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;user-select:none;-webkit-user-drag:none;image-rendering:auto}
+.lb-stage img{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;user-select:none;-webkit-user-drag:none}
 .lb-stage.pixel img{image-rendering:pixelated}
 .lb-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#8b7666}
 .lb-help{padding:6px 14px;font-size:12px;color:#a8957f;background:#2a1d15}
 .lb-help kbd{background:transparent;color:inherit;border-color:#5a4535}
 
+/* الشاشات القصيرة (لابتوب مع شريط المتصفح): نضغط المسافات عشان اللوحة تنعرض كاملة */
+@media(max-height:720px){
+  .form{gap:7px;padding:12px}
+  .head{padding-bottom:7px}
+  .chip{padding:5px 10px}
+  .chips{gap:4px}
+  .group>label{margin-bottom:3px}
+  .bar{padding:7px 16px}
+  .tabs{padding-bottom:7px}
+}
+
 @media(max-width:1180px){.images{grid-template-columns:1fr 1fr}}
 @media(max-width:860px){
   .top{position:static}
   .eval{grid-template-columns:1fr}
-  .form{position:static;max-height:none}
+  .form{position:static;height:auto;min-height:0}
   .images{grid-template-columns:1fr}
 }
 </style>
@@ -163,11 +180,13 @@ textarea:focus,.setup input:focus,.jump input:focus{outline:2px solid var(--yell
 
 <header class="top" id="top">
   <div class="bar">
-    <div class="brand"><b>أداة تدقيق الصور</b><span id="sheetTitle">Local Shop Tools</span></div>
+    <div class="brand"><b data-i18n="title"></b><span id="sheetTitle">Local Shop Tools</span></div>
     <div class="spacer"></div>
-    <div class="status" id="status">غير متصل</div>
-    <button class="btn icon" id="btnRefresh" title="تحديث البيانات من الشيت" disabled>⟳ تحديث</button>
-    <button class="btn icon" id="btnSettings" title="إعدادات الاتصال">⚙</button>
+    <div class="online hidden" id="online"></div>
+    <div class="status" id="status"></div>
+    <button class="btn icon" id="btnRefresh" data-i18n="refresh" data-i18n-title="refreshTitle" disabled></button>
+    <button class="btn icon" id="btnLang"></button>
+    <button class="btn icon" id="btnSettings" data-i18n-title="settingsTitle">⚙</button>
   </div>
   <nav class="tabs" id="tabs" role="tablist"></nav>
 </header>
@@ -177,94 +196,184 @@ textarea:focus,.setup input:focus,.jump input:focus{outline:2px solid var(--yell
   <div id="err" class="err hidden"></div>
 
   <section class="setup hidden" id="setup">
-    <h2>الاتصال بقوقل شيت</h2>
-    <p>الصق رابط الـ Web App وكلمة السر اللي أعطاك إياها المشرف. تنحفظ في هذا المتصفح فقط، وما تحتاج تدخلها مرة ثانية.</p>
-    <label for="inUrl">رابط الـ Web App (ينتهي بـ /exec)</label>
+    <h2 data-i18n="setupH"></h2>
+    <p data-i18n="setupP"></p>
+    <label for="inUrl" data-i18n="setupUrl"></label>
     <input id="inUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
-    <label for="inKey">كلمة السر (API_KEY)</label>
+    <label for="inKey" data-i18n="setupKey"></label>
     <input id="inKey" autocomplete="off">
     <div class="row">
-      <button class="btn primary" id="btnConnect">اتصال</button>
-      <button class="btn hidden" id="btnCancelSetup">إلغاء</button>
+      <button class="btn primary" id="btnConnect" data-i18n="connect"></button>
+      <button class="btn hidden" id="btnCancelSetup" data-i18n="cancel"></button>
     </div>
   </section>
 
-  <div class="notice hidden" id="loading"><h2>جاري التحميل…</h2><p>نجلب البيانات من قوقل شيت</p></div>
-  <div class="notice hidden" id="pick"><h2>اختر اسمك من الأعلى</h2><p>بتظهر لك المنتجات المسندة لك فقط. التقييم ينحفظ تلقائياً في الشيت، ما في زر حفظ.</p></div>
+  <div class="notice hidden" id="loading"><h2 data-i18n="loadingH"></h2><p data-i18n="loadingP"></p></div>
+  <div class="notice hidden" id="pick"><h2 data-i18n="pickH"></h2><p data-i18n="pickP"></p></div>
 
   <div class="eval hidden" id="eval">
     <aside class="form" id="form">
       <div class="head">
         <h3><span id="lblAgent"></span><span class="rowstate" id="rowState"></span></h3>
-        <div class="code"><button id="btnCopy" title="نسخ الكود">نسخ</button><span id="lblCode"></span></div>
-        <div class="progress"><span>المنتج <b id="lblPos">0</b> من <b id="lblTotal">0</b></span><span>تم تقييم <b id="lblDone">0</b></span></div>
+        <div class="code"><button id="btnCopy" data-i18n="copy"></button><span id="lblCode"></span></div>
+        <div class="progress"><span id="lblPos"></span><span id="lblDone"></span></div>
         <div class="pbar"><i id="pbar"></i></div>
       </div>
 
-      <div class="group"><label>القرار (Verdict)</label><div class="chips" id="verdicts"></div></div>
-      <div class="group"><label>التفاصيل (Info)</label><div class="chips" id="infos"></div></div>
-      <div class="group">
-        <label for="txtComments">الملاحظات</label>
-        <textarea id="txtComments" dir="auto" placeholder="اكتب ملاحظتك… تنحفظ بعد ما توقف الكتابة بثانية"></textarea>
+      <div class="group"><label data-i18n="verdict"></label><div class="chips row" id="verdicts"></div></div>
+      <div class="group"><label data-i18n="info"></label><div class="chips" id="infos"></div></div>
+      <div class="group notes">
+        <label for="txtComments" data-i18n="notes"></label>
+        <textarea id="txtComments" dir="auto" data-i18n-ph="notesPh"></textarea>
       </div>
 
       <div class="nav">
-        <button class="btn" id="btnPrev">→ السابق</button>
-        <button class="btn" id="btnNext">التالي ←</button>
-        <button class="btn primary wide" id="btnNextTodo">التالي غير المُقيَّم</button>
+        <button class="btn" id="btnPrev" data-i18n="prev"></button>
+        <button class="btn primary" id="btnNextTodo" data-i18n="nextTodo"></button>
+        <button class="btn" id="btnNext" data-i18n="next"></button>
       </div>
       <form class="jump" id="jump">
-        <input id="inJump" placeholder="رقم أو كود المنتج">
-        <button class="btn" type="submit">انتقال</button>
+        <input id="inJump" data-i18n-ph="jumpPh">
+        <button class="btn" type="submit" data-i18n="jump"></button>
       </form>
     </aside>
 
     <section>
       <div class="ai hidden" id="ai"><span class="tag" id="aiTag"></span><p id="aiText"></p></div>
       <div class="images">
-        <div class="card" data-img="old"><h4>الصورة القديمة (Old)</h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span>اضغط للتكبير بكامل الدقة</span><span></span></div></div>
-        <div class="card" data-img="claude"><h4>صورة كلود (Claude)</h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span>اضغط للتكبير بكامل الدقة</span><span></span></div></div>
-        <div class="card" data-img="gemini"><h4>صورة جيمني (Gemini)</h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span>اضغط للتكبير بكامل الدقة</span><span></span></div></div>
+        <div class="card" data-img="old"><h4 data-i18n="imgOld"></h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span data-i18n="imgHint"></span><span></span></div></div>
+        <div class="card" data-img="claude"><h4 data-i18n="imgClaude"></h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span data-i18n="imgHint"></span><span></span></div></div>
+        <div class="card" data-img="gemini"><h4 data-i18n="imgGemini"></h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span data-i18n="imgHint"></span><span></span></div></div>
       </div>
     </section>
   </div>
 </main>
 
-<div class="lb hidden" id="lb" role="dialog" aria-label="عارض الصور">
+<div class="lb hidden" id="lb" role="dialog">
   <div class="lb-bar">
     <div class="lb-tabs" id="lbTabs"></div>
     <div class="grow"></div>
-    <button class="lb-btn" id="lbOut" title="تصغير">−</button>
+    <button class="lb-btn" id="lbOut" data-i18n-title="zoomOut">−</button>
     <span class="lb-zoom" id="lbZoom">100%</span>
-    <button class="lb-btn" id="lbIn" title="تكبير">+</button>
-    <button class="lb-btn" id="lbFit" title="ملء الشاشة">ملء الشاشة</button>
-    <button class="lb-btn" id="lbReal" title="الحجم الحقيقي (كل بكسل بكسل)">الحجم الحقيقي 1:1</button>
-    <a class="lb-btn" id="lbOpen" target="_blank" rel="noopener">فتح في تبويب جديد</a>
-    <button class="lb-btn" id="lbClose" title="إغلاق (Esc)">✕</button>
+    <button class="lb-btn" id="lbIn" data-i18n-title="zoomIn">+</button>
+    <button class="lb-btn" id="lbFit" data-i18n="fit"></button>
+    <button class="lb-btn" id="lbReal" data-i18n="real"></button>
+    <a class="lb-btn" id="lbOpen" target="_blank" rel="noopener" data-i18n="openTab"></a>
+    <button class="lb-btn" id="lbClose" data-i18n-title="close">✕</button>
   </div>
   <div class="lb-stage" id="lbStage"><img id="lbImg" alt=""><div class="lb-msg" id="lbMsg"></div></div>
-  <div class="lb-help">
-    عجلة الماوس للتكبير · اسحب للتحريك · دبل كلك بين ملء الشاشة و 1:1 ·
-    <kbd>←</kbd><kbd>→</kbd> أو <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> للتنقل بين الصور على <b>نفس المكان ونفس التكبير</b> · <kbd>Esc</kbd> إغلاق
-  </div>
+  <div class="lb-help" data-i18n-html="lbHelp"></div>
 </div>
 
 <div class="toasts" id="toasts"></div>
 
 <script>
-/* ============ إعداد المشرف: حط الرابط وكلمة السر هنا قبل ما توزع الملف ============
-   لو تركتها فاضية، الأداة تطلبها من الموظف أول مرة وتحفظها في متصفحه. */
+/* ============ طريقة الملف المحلي فقط: رابط السكربت وكلمة السر ============
+   لما تنفتح الأداة من رابط السكربت نفسه (الطريقة الموصى بها)، ما تحتاج هذول. */
 const API_URL = "";
 const API_KEY = "";
-/* ================================================================================= */
+/* ========================================================================= */
 
-const ROLE_AR = { content: "محتوى", quality: "جودة" };
-const TEXT_DELAY = 1000;           // الحفظ بعد التوقف عن الكتابة
+/* ---------------- اللغة ----------------
+   الاختيار ينحفظ في متصفح كل موظف لحاله، وما يأثر على أحد ثاني. */
+const I18N = {
+  ar: {
+    title: "أداة تدقيق الصور",
+    refresh: "⟳ تحديث", refreshTitle: "تحديث البيانات من الشيت", settingsTitle: "إعدادات الاتصال", langBtn: "English",
+    offline: "غير متصل", connected: "متصل", saving: "جار الحفظ…", saved: "تم الحفظ تلقائيا {time}",
+    retry: "تعذر الحفظ، تجري إعادة المحاولة… ({n})", noNetSave: "لا يوجد اتصال بالإنترنت، وسيتم الحفظ عند عودته ({n})",
+    onlineNow: "متصل الآن:", onlineTip: "متصل الآن — المنتج {pos} من {total}",
+    setupH: "الاتصال بـ Google Sheets", setupP: "الصق رابط تطبيق الويب وكلمة المرور التي زودك بها المشرف. تحفظ في هذا المتصفح فقط.",
+    setupUrl: "رابط تطبيق الويب (ينتهي بـ /exec)", setupKey: "كلمة المرور (API_KEY)", connect: "اتصال", cancel: "إلغاء",
+    loadingH: "جار التحميل…", loadingP: "يجري جلب البيانات من Google Sheets",
+    pickH: "اختر اسمك من الأعلى", pickP: "ستظهر لك المنتجات المسندة إليك فقط، ويحفظ التقييم تلقائيا في الشيت دون الحاجة إلى زر حفظ.",
+    copy: "نسخ", pos: "المنتج {pos} من {total}", done: "تم تقييم {n}",
+    stateDone: "تم التقييم", stateTodo: "لم يقيم",
+    verdict: "القرار (Verdict)", info: "التفاصيل (Info)", notes: "الملاحظات",
+    notesPh: "اكتب ملاحظتك هنا، وتحفظ تلقائيا بعد التوقف عن الكتابة بثانية",
+    prev: "→ السابق", next: "التالي ←", nextTodo: "التالي غير المقيم", jumpPh: "رقم المنتج أو كوده", jump: "انتقال",
+    content: "محتوى", quality: "جودة",
+    imgOld: "الصورة القديمة (Old)", imgClaude: "صورة Claude", imgGemini: "صورة Gemini", imgHint: "انقر للتكبير بالدقة الكاملة",
+    imgLoading: "جار التحميل…", imgNone: "لا يوجد رابط", imgError: "تعذر تحميل الصورة، انقر لفتح الرابط", lbError: "تعذر تحميل الصورة",
+    aiPick: "اختيار الفرز الآلي", aiNone: "لا يوجد قرار آلي",
+    zoomOut: "تصغير", zoomIn: "تكبير", fit: "ملء الشاشة", real: "الحجم الحقيقي 1:1", openTab: "فتح في تبويب جديد", close: "إغلاق (Esc)",
+    lbHelp: "عجلة الماوس للتكبير · اسحب للتحريك · انقر مرتين للتبديل بين ملء الشاشة و1:1 · <kbd>←</kbd><kbd>→</kbd> أو <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> للتنقل بين الصور على <b>الموضع والتكبير نفسيهما</b> · <kbd>Esc</kbd> للإغلاق",
+    last: "هذا آخر منتج", copied: "تم نسخ الكود", notFound: "لم يتم العثور على المنتج ضمن منتجاتك", refreshed: "تم التحديث من الشيت",
+    allDone: "أحسنت! أنهيت تقييم جميع المنتجات المسندة إليك 🎉", noTasks: "لا توجد منتجات مسندة إلى {name}",
+    badUrl: "يجب أن يكون الرابط رابط تطبيق ويب ينتهي بـ /exec",
+    errConnect: "تعذر الاتصال بالشيت:\n{e}", errTasks: "تعذر جلب المنتجات:\n{e}",
+    noAgents: "لا توجد أسماء موظفين في عمودي Content Agent و Quality Agent.",
+    missing: "تنبيه للمشرف: الأعمدة التالية غير موجودة في الشيت: {cols}. شغل الدالة setup في Apps Script.",
+    reassigned: "المنتج {code} أصبح مسندا إلى {agent}", nobody: "لا أحد", gone: "المنتج {code} لم يعد موجودا في الشيت",
+    unknown: "خطأ غير معروف", noNet: "لا يوجد اتصال بالإنترنت",
+    blocked: "تعذر الوصول إلى السكربت. على الأرجح أن النشر ليس على Who has access: Anyone. افتح الأداة من رابط السكربت مباشرة بدلا من الملف.",
+    htmlReply: "أعاد الرابط صفحة بدلا من البيانات. تأكد أن النشر على Who has access: Anyone وأن الرابط ينتهي بـ /exec",
+    badReply: "رد غير مفهوم من الشيت ({status})",
+  },
+  en: {
+    title: "Image Audit Tool",
+    refresh: "⟳ Refresh", refreshTitle: "Reload data from the sheet", settingsTitle: "Connection settings", langBtn: "العربية",
+    offline: "Offline", connected: "Connected", saving: "Saving…", saved: "Saved automatically {time}",
+    retry: "Couldn't save, retrying… ({n})", noNetSave: "No internet; will save when it's back ({n})",
+    onlineNow: "Online now:", onlineTip: "Online now — product {pos} of {total}",
+    setupH: "Connect to Google Sheets", setupP: "Paste the web app link and password from your supervisor. They're saved in this browser only.",
+    setupUrl: "Web app link (ends with /exec)", setupKey: "Password (API_KEY)", connect: "Connect", cancel: "Cancel",
+    loadingH: "Loading…", loadingP: "Fetching data from Google Sheets",
+    pickH: "Pick your name above", pickP: "You'll only see the products assigned to you. Ratings save to the sheet automatically; there's no save button.",
+    copy: "Copy", pos: "Product {pos} of {total}", done: "Rated {n}",
+    stateDone: "Rated", stateTodo: "Not rated",
+    verdict: "Verdict", info: "Info", notes: "Notes",
+    notesPh: "Write a note. It saves a second after you stop typing.",
+    prev: "← Previous", next: "Next →", nextTodo: "Next unrated", jumpPh: "Product # or code", jump: "Go",
+    content: "Content", quality: "Quality",
+    imgOld: "Old image", imgClaude: "Claude image", imgGemini: "Gemini image", imgHint: "Click to zoom at full resolution",
+    imgLoading: "Loading…", imgNone: "No link", imgError: "Couldn't load the image. Click to open the link.", lbError: "Couldn't load the image",
+    aiPick: "AI pick", aiNone: "No AI decision",
+    zoomOut: "Zoom out", zoomIn: "Zoom in", fit: "Fit to screen", real: "Actual size 1:1", openTab: "Open in new tab", close: "Close (Esc)",
+    lbHelp: "Scroll to zoom · drag to pan · double-click to switch between fit and 1:1 · <kbd>←</kbd><kbd>→</kbd> or <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> to switch images at the <b>same spot and zoom</b> · <kbd>Esc</kbd> to close",
+    last: "This is the last product", copied: "Code copied", notFound: "That product isn't in your list", refreshed: "Reloaded from the sheet",
+    allDone: "Well done! You've rated all your products 🎉", noTasks: "No products are assigned to {name}",
+    badUrl: "The link must be a web app link ending with /exec",
+    errConnect: "Couldn't connect to the sheet:\n{e}", errTasks: "Couldn't load the products:\n{e}",
+    noAgents: "There are no names in the Content Agent or Quality Agent columns.",
+    missing: "For the supervisor: these columns are missing from the sheet: {cols}. Run setup in Apps Script.",
+    reassigned: "Product {code} is now assigned to {agent}", nobody: "nobody", gone: "Product {code} is no longer in the sheet",
+    unknown: "Unknown error", noNet: "No internet connection",
+    blocked: "Couldn't reach the script. The deployment probably isn't set to Who has access: Anyone. Open the tool from the script's link instead of the file.",
+    htmlReply: "The link returned a page instead of data. Check that the deployment is set to Who has access: Anyone and the link ends with /exec",
+    badReply: "Unexpected reply from the sheet ({status})",
+  },
+};
 const LS = {
   get(k, d) { try { const v = localStorage.getItem("audit." + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem("audit." + k, JSON.stringify(v)); } catch {} },
 };
+let lang = LS.get("lang", "ar") === "en" ? "en" : "ar";
+function t(key, vars) {
+  let s = (I18N[lang][key] ?? I18N.ar[key] ?? key);
+  if (vars) for (const k in vars) s = s.split("{" + k + "}").join(vars[k]);
+  return s;
+}
+const rtl = () => lang === "ar";
 
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.documentElement.dir = rtl() ? "rtl" : "ltr";
+  document.title = t("title") + " - Local Shop";
+  for (const el of document.querySelectorAll("[data-i18n]")) el.textContent = t(el.dataset.i18n);
+  for (const el of document.querySelectorAll("[data-i18n-html]")) el.innerHTML = t(el.dataset.i18nHtml);
+  for (const el of document.querySelectorAll("[data-i18n-title]")) el.title = t(el.dataset.i18nTitle);
+  for (const el of document.querySelectorAll("[data-i18n-ph]")) el.placeholder = t(el.dataset.i18nPh);
+  $("btnLang").textContent = t("langBtn");
+  renderStatus();
+  renderOnline();
+  if (agents.length) renderTabs();
+  if (cur && tasks.length && !$("eval").classList.contains("hidden")) go(idx, true);
+  if (!$("lb").classList.contains("hidden")) showInViewer(lb.key);
+  stick();
+}
+
+const TEXT_DELAY = 1000;           // الحفظ بعد التوقف عن الكتابة
 const $ = (id) => document.getElementById(id);
 const cfg = { url: API_URL || LS.get("url", ""), key: API_KEY || LS.get("key", "") };
 let agents = [], options = {}, cur = null, tasks = [], idx = 0;
@@ -275,11 +384,11 @@ const GAS = typeof google !== "undefined" && google.script && google.script.run 
 const connected = () => !!(GAS || cfg.url);
 function gas(fn, arg) {
   return new Promise((ok, fail) => google.script.run.withSuccessHandler(ok).withFailureHandler((e) => fail(new Error(e && e.message || String(e))))[fn](arg))
-    .then((d) => { if (!d || !d.ok) throw new Error((d && d.error) || "خطأ غير معروف"); return d; });
+    .then((d) => { if (!d || !d.ok) throw new Error((d && d.error) || t("unknown")); return d; });
 }
 
 async function api(params) {
-  if (GAS) return gas("apiRead", params);
+  if (GAS) return gas(params.action === "ping" ? "apiPing" : "apiRead", params);
   const q = new URLSearchParams({ ...params, key: cfg.key, t: Date.now() });
   return parse(await send(cfg.url + "?" + q, { redirect: "follow" }));
 }
@@ -289,21 +398,13 @@ async function apiPost(body) {
   return parse(await send(cfg.url, { method: "POST", body: JSON.stringify({ ...body, key: cfg.key }), redirect: "follow" }));
 }
 async function send(url, opts) {
-  try { return await fetch(url, opts); } catch {
-    throw new Error(navigator.onLine
-      ? "ما وصلنا للسكربت. غالباً النشر مو على Who has access: Anyone (لو مختار Anyone within الشركة، الصفحة ما تقدر توصل). من Apps Script: Deploy ← Manage deployments ← ✏️ وغيّرها لـ Anyone"
-      : "لا يوجد اتصال بالإنترنت");
-  }
+  try { return await fetch(url, opts); } catch { throw new Error(navigator.onLine ? t("blocked") : t("noNet")); }
 }
 async function parse(res) {
   const text = await res.text();
   let data;
-  try { data = JSON.parse(text); } catch {
-    throw new Error(/<html|<!doctype/i.test(text)
-      ? "الرابط رجّع صفحة بدل البيانات. تأكد إن النشر على Who has access: Anyone وإن الرابط ينتهي بـ /exec"
-      : "رد غير مفهوم من الشيت (" + res.status + ")");
-  }
-  if (!data.ok) throw new Error(data.error || "خطأ غير معروف");
+  try { data = JSON.parse(text); } catch { throw new Error(/<html|<!doctype/i.test(text) ? t("htmlReply") : t("badReply", { status: res.status })); }
+  if (!data.ok) throw new Error(data.error || t("unknown"));
   return data;
 }
 
@@ -319,11 +420,11 @@ function persist() {
   LS.set("pending", [...all]);
 }
 
-function setField(t, field, value, delay) {
-  if (!t || t[field] === value) return;
-  t[field] = value;
-  const id = pkey(cur.role, cur.agent, t.row);
-  const u = pending.get(id) || { id, row: t.row, code: t.code, agent: cur.agent, role: cur.role, fields: {} };
+function setField(task, field, value, delay) {
+  if (!task || task[field] === value) return;
+  task[field] = value;
+  const id = pkey(cur.role, cur.agent, task.row);
+  const u = pending.get(id) || { id, row: task.row, code: task.code, agent: cur.agent, role: cur.role, fields: {} };
   u.fields[field] = value;
   pending.set(id, u);
   persist();
@@ -337,6 +438,12 @@ function schedule(delay) {
   renderStatus();
 }
 
+function saveErrorText(r, u) {
+  if (r.code === "reassigned") return t("reassigned", { code: u ? u.code : "", agent: r.assigned || t("nobody") });
+  if (r.code === "gone") return t("gone", { code: u ? u.code : "" });
+  return r.error;
+}
+
 async function flush() {
   clearTimeout(flushTimer);
   if (inFlight || !pending.size || !connected()) return renderStatus();
@@ -345,7 +452,7 @@ async function flush() {
   renderStatus();
   try {
     const res = await apiPost({ action: "save", updates: inFlight });
-    for (const r of res.results) if (!r.ok) toast(r.error, "bad");
+    for (const r of res.results) if (!r.ok) toast(saveErrorText(r, inFlight.find((u) => u.id === r.id)), "bad");
     lastSaved = new Date(); saveError = ""; retryDelay = 0;
   } catch (e) {
     // رجّع اللي فشل للطابور، والتعديلات الأحدث تغلب
@@ -364,16 +471,20 @@ async function flush() {
 function renderStatus() {
   const el = $("status");
   const waiting = pending.size + (inFlight ? inFlight.length : 0);
+  el.title = "";
   if (saveError && pending.size) {
     el.className = "status error";
-    el.textContent = (navigator.onLine ? "تعذر الحفظ، نعيد المحاولة…" : "لا يوجد إنترنت، بنحفظ أول ما يرجع") + " (" + waiting + ")";
+    el.textContent = t(navigator.onLine ? "retry" : "noNetSave", { n: waiting });
     el.title = saveError;
   } else if (waiting) {
-    el.className = "status saving"; el.textContent = "جاري الحفظ…"; el.title = "";
+    el.className = "status saving"; el.textContent = t("saving");
   } else if (lastSaved) {
-    el.className = "status saved"; el.textContent = "تم الحفظ تلقائياً " + lastSaved.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }); el.title = "";
-  } else if (cur) {
-    el.className = "status saved"; el.textContent = "متصل"; el.title = "";
+    el.className = "status saved";
+    el.textContent = t("saved", { time: lastSaved.toLocaleTimeString(rtl() ? "ar-SA-u-nu-latn" : "en-US", { hour: "2-digit", minute: "2-digit" }) });
+  } else if (agents.length) {
+    el.className = "status saved"; el.textContent = t("connected");
+  } else {
+    el.className = "status"; el.textContent = t("offline");
   }
 }
 
@@ -387,6 +498,39 @@ window.addEventListener("beforeunload", (e) => {
   e.preventDefault(); e.returnValue = "";
 });
 
+/* ---------------- المتصلون الآن ----------------
+   نبضة كل 30 ثانية: ترسل اسم الموظف المختار ورقم المنتج، وترجع قائمة اللي فاتحين الأداة الحين. */
+let online = [], pingTimer = 0;
+const agentKey = (a) => a.role + "|" + a.name;
+async function ping() {
+  clearTimeout(pingTimer);
+  pingTimer = setTimeout(ping, 30000);
+  if (!agents.length || document.hidden) return;
+  try {
+    const me = cur ? { name: cur.agent, role: cur.role, pos: idx + 1, total: tasks.length } : {};
+    const res = await api({ action: "ping", ...me, names: JSON.stringify(agents.map(agentKey)) });
+    online = res.online || [];
+    renderOnline();
+    renderTabs();
+  } catch {}
+}
+document.addEventListener("visibilitychange", () => { if (!document.hidden) ping(); });
+
+function onlineOf(a) { return online.find((o) => o.name === a.name && o.role === a.role); }
+function renderOnline() {
+  const box = $("online");
+  box.innerHTML = "";
+  box.classList.toggle("hidden", !online.length);
+  if (!online.length) return;
+  box.append(t("onlineNow"));
+  for (const o of online) {
+    const i = document.createElement("i");
+    i.textContent = o.name;
+    i.title = t(o.role) + " · " + t("onlineTip", { pos: o.pos, total: o.total }) + (o.email ? "\n" + o.email : "");
+    box.append(i);
+  }
+}
+
 /* ---------------- تحميل البيانات ---------------- */
 async function start() {
   show("loading");
@@ -398,17 +542,17 @@ async function start() {
     $("btnRefresh").disabled = false;
     const w = $("warn");
     w.classList.toggle("hidden", !data.missing.length);
-    w.textContent = data.missing.length ? "تنبيه للمشرف: هذه الأعمدة غير موجودة في الشيت: " + data.missing.join("، ") + ". شغّل الدالة setup في Apps Script." : "";
+    w.textContent = data.missing.length ? t("missing", { cols: data.missing.join(", ") }) : "";
     renderTabs();
     renderStatus();
     flush(); // أي تعديلات بقيت من آخر مرة
     const last = LS.get("agent", null);
     const a = last && agents.find((x) => x.name === last.name && x.role === last.role);
-    if (a) await openAgent(a); else show(agents.length ? "pick" : null);
-    if (!agents.length) showErr("ما في أسماء موظفين في أعمدة Content Agent / Quality Agent.");
+    if (a) await openAgent(a); else { show(agents.length ? "pick" : null); ping(); }
+    if (!agents.length) showErr(t("noAgents"));
   } catch (e) {
     show(null);
-    showErr("ما قدرنا نتصل بالشيت:\n" + e.message);
+    showErr(t("errConnect", { e: e.message }));
     if (!API_URL && !GAS) openSetup(true);
   }
 }
@@ -420,9 +564,11 @@ function renderTabs() {
     const b = document.createElement("button");
     b.className = "tab" + (a.done >= a.total ? " complete" : "");
     b.setAttribute("role", "tab");
-    b.setAttribute("aria-selected", String(!!cur && cur.name === a.name && cur.role === a.role));
+    b.setAttribute("aria-selected", String(!!cur && cur.agent === a.name && cur.role === a.role));
+    const o = onlineOf(a);
+    if (o) { const d = document.createElement("span"); d.className = "dot"; b.title = t("onlineTip", { pos: o.pos, total: o.total }); b.append(d); }
     b.append(a.name);
-    const role = document.createElement("small"); role.textContent = ROLE_AR[a.role];
+    const role = document.createElement("small"); role.textContent = t(a.role);
     const count = document.createElement("span"); count.className = "count"; count.textContent = a.done + "/" + a.total;
     b.append(role, count);
     b.onclick = () => openAgent(a);
@@ -434,7 +580,7 @@ async function openAgent(a, keepRow) {
   commitText();
   textOwner = null;
   await flushNow();
-  cur = { name: a.name, agent: a.name, role: a.role };
+  cur = { agent: a.name, role: a.role };
   LS.set("agent", { name: a.name, role: a.role });
   renderTabs();
   if (!keepRow) show("loading");
@@ -444,21 +590,22 @@ async function openAgent(a, keepRow) {
     // التعديلات اللي لسه ما وصلت الشيت تغلب على اللي رجع منه
     for (const u of pending.values()) {
       if (u.role !== cur.role || u.agent !== cur.agent) continue;
-      const t = tasks.find((x) => x.row === u.row && x.code === u.code);
-      if (t) Object.assign(t, u.fields);
+      const x = tasks.find((y) => y.row === u.row && y.code === u.code);
+      if (x) Object.assign(x, u.fields);
     }
   } catch (e) {
-    showErr("ما قدرنا نجيب المنتجات:\n" + e.message);
+    showErr(t("errTasks", { e: e.message }));
     return show(null);
   }
-  if (!tasks.length) { show("pick"); return toast("ما في منتجات مسندة لـ " + a.name); }
+  if (!tasks.length) { show("pick"); return toast(t("noTasks", { name: a.name })); }
   const row = keepRow || LS.get("pos." + a.role + "|" + a.name, 0);
-  let i = tasks.findIndex((t) => t.row === row);
-  if (i < 0) i = Math.max(tasks.findIndex((t) => !isDone(t.verdict)), 0);
+  let i = tasks.findIndex((x) => x.row === row);
+  if (i < 0) i = Math.max(tasks.findIndex((x) => !isDone(x.verdict)), 0);
   options.cur = options[a.role];
   buildChips();
   show("eval");
   go(i);
+  ping();
 }
 
 async function flushNow() {
@@ -498,51 +645,53 @@ function buildChips() {
 }
 
 function pickChip(field, v, toggle) {
-  const t = tasks[idx];
-  setField(t, field, toggle && t[field] === v ? "" : v, 0); // الضغط بالماوس مرة ثانية يلغي الاختيار
+  const task = tasks[idx];
+  setField(task, field, toggle && task[field] === v ? "" : v, 0); // الضغط بالماوس مرة ثانية يلغي الاختيار
   renderChips();
 }
 
 function renderChips() {
-  const t = tasks[idx];
+  const task = tasks[idx];
   for (const [box, field] of [[$("verdicts"), "verdict"], [$("infos"), "info"]]) {
-    for (const b of box.children) b.setAttribute("aria-pressed", String(b.dataset.value === t[field]));
+    for (const b of box.children) b.setAttribute("aria-pressed", String(b.dataset.value === task[field]));
   }
 }
 
-function go(i) {
+function go(i, keepImages) {
   if (!tasks.length) return;
-  commitText();
+  if (!keepImages) commitText();
+  const moved = idx !== i;
   idx = Math.max(0, Math.min(i, tasks.length - 1));
-  const t = tasks[idx];
-  LS.set("pos." + cur.role + "|" + cur.agent, t.row);
+  const task = tasks[idx];
+  LS.set("pos." + cur.role + "|" + cur.agent, task.row);
 
-  $("lblAgent").textContent = cur.agent + " · " + ROLE_AR[cur.role];
-  $("lblCode").textContent = t.code || "—";
-  $("txtComments").value = t.comments;
-  textOwner = t;
+  $("lblAgent").textContent = cur.agent + " · " + t(cur.role);
+  $("lblCode").textContent = task.code || "—";
+  if (!keepImages) { $("txtComments").value = task.comments; textOwner = task; }
   renderChips();
   renderProgress();
   $("btnPrev").disabled = idx === 0;
   $("btnNext").disabled = idx === tasks.length - 1;
 
-  // قرار الفرز الآلي (Cloud Decision) وتعليق كلود
-  const ai = t.aiDecision.trim();
-  $("ai").classList.toggle("hidden", !ai && !t.aiComment.trim());
-  $("aiTag").textContent = ai || "بدون قرار آلي";
+  // قرار الفرز الآلي وتعليق كلود
+  const ai = task.aiDecision.trim();
+  $("ai").classList.toggle("hidden", !ai && !task.aiComment.trim());
+  $("aiTag").textContent = ai || t("aiNone");
   $("aiTag").className = "tag " + (/approved/i.test(ai) ? "good" : /reject/i.test(ai) ? "bad" : "");
-  $("aiText").textContent = t.aiComment;
+  $("aiText").textContent = task.aiComment;
   const pick = /claude/i.test(ai) ? "claude" : /gemini/i.test(ai) ? "gemini" : /original/i.test(ai) ? "old" : "";
 
   for (const card of document.querySelectorAll(".card")) {
     const k = card.dataset.img;
-    setImage(card, t[k]);
+    if (!keepImages) setImage(card, task[k]);
     card.classList.toggle("pick", k === pick);
     let badge = card.querySelector(".badge");
-    if (k === pick && !badge) { badge = document.createElement("span"); badge.className = "badge"; badge.textContent = "اختيار الفرز الآلي"; card.querySelector("h4").append(badge); }
+    if (k === pick && !badge) { badge = document.createElement("span"); badge.className = "badge"; card.querySelector("h4").append(badge); }
     if (k !== pick && badge) badge.remove();
+    if (badge && k === pick) badge.textContent = t("aiPick");
   }
-  preload(idx + 1); preload(idx + 2);
+  if (!keepImages) { preload(idx + 1); preload(idx + 2); }
+  if (moved && !keepImages) { clearTimeout(go.pt); go.pt = setTimeout(ping, 1500); }
 }
 
 for (const card of document.querySelectorAll(".card")) {
@@ -557,30 +706,29 @@ function setImage(card, url) {
   const a = card.querySelector("a"), img = card.querySelector("img"), msg = card.querySelector(".msg"), size = card.querySelector(".meta span:last-child");
   size.textContent = "";
   img.onload = img.onerror = null;
-  if (!url) { a.removeAttribute("href"); img.removeAttribute("src"); img.style.display = "none"; msg.textContent = "لا يوجد رابط"; return; }
+  if (!url) { a.removeAttribute("href"); img.removeAttribute("src"); img.style.display = "none"; msg.textContent = t("imgNone"); return; }
   a.href = url;
-  msg.textContent = "جاري التحميل…";
+  msg.textContent = t("imgLoading");
   img.style.display = "";
   img.onload = () => { msg.textContent = ""; size.textContent = img.naturalWidth + "×" + img.naturalHeight; };
-  img.onerror = () => { img.style.display = "none"; msg.textContent = "تعذر تحميل الصورة — اضغط لفتح الرابط"; };
+  img.onerror = () => { img.style.display = "none"; msg.textContent = t("imgError"); };
   img.src = url;
 }
 
 function preload(i) {
-  const t = tasks[i];
-  if (t) for (const u of [t.old, t.claude, t.gemini]) if (u) new Image().src = u;
+  const x = tasks[i];
+  if (x) for (const u of [x.old, x.claude, x.gemini]) if (u) new Image().src = u;
 }
 
 function renderProgress() {
-  const t = tasks[idx];
+  const task = tasks[idx];
   const done = tasks.filter((x) => isDone(x.verdict)).length;
-  $("lblPos").textContent = idx + 1;
-  $("lblTotal").textContent = tasks.length;
-  $("lblDone").textContent = done;
+  $("lblPos").textContent = t("pos", { pos: idx + 1, total: tasks.length });
+  $("lblDone").textContent = t("done", { n: done });
   $("pbar").style.width = (tasks.length ? (done / tasks.length) * 100 : 0) + "%";
   const st = $("rowState");
-  st.textContent = isDone(t.verdict) ? "مُقيَّم" : "لم يُقيَّم";
-  st.className = "rowstate" + (isDone(t.verdict) ? " done" : "");
+  st.textContent = t(isDone(task.verdict) ? "stateDone" : "stateTodo");
+  st.className = "rowstate" + (isDone(task.verdict) ? " done" : "");
   const a = agents.find((x) => x.name === cur.agent && x.role === cur.role);
   if (a && a.done !== done) { a.done = done; renderTabs(); }
 }
@@ -591,7 +739,7 @@ function nextTodo() {
     const j = (idx + k) % tasks.length;
     if (!isDone(tasks[j].verdict)) return go(j);
   }
-  toast("أحسنت! قيّمت كل المنتجات المسندة لك 🎉", "good");
+  toast(t("allDone"), "good");
 }
 
 /* الملاحظات: تنحفظ بعد ثانية من آخر حرف، أو فوراً لما تطلع من الخانة أو تنتقل.
@@ -605,16 +753,17 @@ $("txtComments").addEventListener("blur", () => commitText(0));
 
 /* ---------------- الأزرار ---------------- */
 $("btnPrev").onclick = () => go(idx - 1);
-$("btnNext").onclick = () => { if (idx === tasks.length - 1) toast("هذا آخر منتج"); else go(idx + 1); };
+$("btnNext").onclick = () => { if (idx === tasks.length - 1) toast(t("last")); else go(idx + 1); };
 $("btnNextTodo").onclick = nextTodo;
-$("btnCopy").onclick = () => { navigator.clipboard?.writeText(tasks[idx].code).then(() => toast("تم نسخ الكود")); };
+$("btnCopy").onclick = () => { navigator.clipboard?.writeText(tasks[idx].code).then(() => toast(t("copied"))); };
+$("btnLang").onclick = () => { lang = rtl() ? "en" : "ar"; LS.set("lang", lang); applyLang(); };
 $("jump").onsubmit = (e) => {
   e.preventDefault();
   const v = $("inJump").value.trim();
   if (!v) return;
-  let i = tasks.findIndex((t) => t.code.trim() === v);
+  let i = tasks.findIndex((x) => x.code.trim() === v);
   if (i < 0 && /^\d+$/.test(v) && v.length < 6) i = Number(v) - 1;
-  if (i < 0 || i >= tasks.length) return toast("ما لقينا المنتج عندك", "bad");
+  if (i < 0 || i >= tasks.length) return toast(t("notFound"), "bad");
   $("inJump").value = "";
   go(i);
 };
@@ -626,9 +775,13 @@ $("btnRefresh").onclick = async () => {
     agents = data.agents; options = data.options;
     const a = keep && agents.find((x) => x.name === keep.a.agent && x.role === keep.a.role);
     if (a) await openAgent(a, keep.row); else { cur = null; renderTabs(); show("pick"); }
-    toast("تم التحديث من الشيت");
+    toast(t("refreshed"));
   } catch (e) { toast(e.message, "bad"); }
 };
+
+// الأسهم تمشي مع اتجاه اللغة: في العربي ← التالي، وفي الإنجليزي → التالي
+const nextArrow = () => (rtl() ? "ArrowLeft" : "ArrowRight");
+const prevArrow = () => (rtl() ? "ArrowRight" : "ArrowLeft");
 
 document.addEventListener("keydown", (e) => {
   if (!$("lb").classList.contains("hidden")) return viewerKey(e);
@@ -638,11 +791,11 @@ document.addEventListener("keydown", (e) => {
   if ($("eval").classList.contains("hidden")) return;
   const chip = document.querySelector('.chip[data-key="' + e.key + '"]');
   if (chip) { e.preventDefault(); return pickChip(chip.parentElement.id === "verdicts" ? "verdict" : "info", chip.dataset.value, false); }
-  if (e.key === "ArrowLeft") { e.preventDefault(); $("btnNext").click(); }
-  else if (e.key === "ArrowRight") { e.preventDefault(); if (idx > 0) go(idx - 1); }
+  if (e.key === nextArrow()) { e.preventDefault(); $("btnNext").click(); }
+  else if (e.key === prevArrow()) { e.preventDefault(); if (idx > 0) go(idx - 1); }
   else if (e.key.toLowerCase() === "n") { e.preventDefault(); nextTodo(); }
   else if (e.key.toLowerCase() === "c") { e.preventDefault(); $("txtComments").focus(); }
-  else if (e.key.toLowerCase() === "z") { e.preventDefault(); const t = tasks[idx]; const k = ["claude", "gemini", "old"].find((x) => t[x]); if (k) openViewer(k); }
+  else if (e.key.toLowerCase() === "z") { e.preventDefault(); const x = tasks[idx]; const k = ["claude", "gemini", "old"].find((y) => x[y]); if (k) openViewer(k); }
 });
 
 /* ---------------- عارض التكبير ----------------
@@ -661,10 +814,10 @@ function closeViewer() {
   $("lb").classList.add("hidden");
   document.body.style.overflow = "";
 }
-function viewerKeys() { const t = tasks[idx]; return ["old", "claude", "gemini"].filter((k) => t && t[k]); }
+function viewerKeys() { const x = tasks[idx]; return ["old", "claude", "gemini"].filter((k) => x && x[k]); }
 
 function showInViewer(key) {
-  const t = tasks[idx], url = t[key];
+  const url = tasks[idx][key];
   lb.key = key;
   const tabs = $("lbTabs");
   tabs.innerHTML = "";
@@ -679,7 +832,7 @@ function showInViewer(key) {
   $("lbOpen").href = url;
   const img = $("lbImg");
   if (lb.nw) lb.view = currentView();
-  $("lbMsg").textContent = "جاري التحميل…";
+  $("lbMsg").textContent = t("imgLoading");
   img.style.visibility = "hidden";
   img.onload = () => {
     lb.nw = img.naturalWidth; lb.nh = img.naturalHeight;
@@ -687,7 +840,7 @@ function showInViewer(key) {
     img.style.visibility = "";
     applyView(lb.view || { cx: 0.5, cy: 0.5, rel: 1 });
   };
-  img.onerror = () => { $("lbMsg").textContent = "تعذر تحميل الصورة"; };
+  img.onerror = () => { $("lbMsg").textContent = t("lbError"); };
   img.src = url;
   if (img.complete && img.naturalWidth) img.onload();
 }
@@ -720,11 +873,7 @@ function render() {
   $("lbStage").classList.toggle("pixel", lb.s >= 3);
 }
 function setFit() { applyView({ cx: 0.5, cy: 0.5, rel: 1 }); }
-function setReal(px, py) {
-  const { w, h } = stageSize();
-  if (px == null) { px = w / 2; py = h / 2; }
-  zoomAt(1 / lb.s, px, py);
-}
+function setReal(px, py) { zoomAt(1 / lb.s, px, py); }
 function switchImage(step) {
   const keys = viewerKeys();
   showInViewer(keys[(keys.indexOf(lb.key) + step + keys.length) % keys.length]);
@@ -757,8 +906,8 @@ window.addEventListener("resize", () => { if (!$("lb").classList.contains("hidde
 function viewerKey(e) {
   const k = e.key;
   if (k === "Escape") closeViewer();
-  else if (k === "ArrowLeft") switchImage(1);
-  else if (k === "ArrowRight") switchImage(-1);
+  else if (k === nextArrow()) switchImage(1);
+  else if (k === prevArrow()) switchImage(-1);
   else if (/^[1-3]$/.test(k)) { const keys = viewerKeys(); if (keys[k - 1]) showInViewer(keys[k - 1]); }
   else if (k === "+" || k === "=") zoomAt(1.25);
   else if (k === "-") zoomAt(0.8);
@@ -767,7 +916,7 @@ function viewerKey(e) {
   e.preventDefault();
 }
 
-/* ---------------- الإعدادات ---------------- */
+/* ---------------- الإعدادات (طريقة الملف المحلي) ---------------- */
 function openSetup(required) {
   $("inUrl").value = cfg.url; $("inKey").value = cfg.key;
   $("btnCancelSetup").classList.toggle("hidden", !!required);
@@ -778,7 +927,7 @@ $("btnSettings").onclick = () => openSetup(!cfg.url);
 $("btnCancelSetup").onclick = () => { $("setup").classList.add("hidden"); show(cur ? "eval" : "pick"); };
 $("btnConnect").onclick = () => {
   const url = $("inUrl").value.trim(), key = $("inKey").value.trim();
-  if (!/^https:\/\/script\.google(usercontent)?\.com\/.+\/exec/.test(url)) return toast("الرابط لازم يكون رابط Web App وينتهي بـ /exec", "bad");
+  if (!/^https:\/\/script\.google(usercontent)?\.com\/.+\/exec/.test(url)) return toast(t("badUrl"), "bad");
   cfg.url = url; cfg.key = key;
   LS.set("url", url); LS.set("key", key);
   $("setup").classList.add("hidden");
@@ -790,15 +939,16 @@ function show(id) { for (const x of ["loading", "pick", "eval"]) $(x).classList.
 function showErr(m) { $("err").textContent = m; $("err").classList.remove("hidden"); }
 function hideErr() { $("err").classList.add("hidden"); }
 function toast(m, kind) {
-  const t = document.createElement("div");
-  t.className = "toast " + (kind || ""); t.textContent = m;
-  $("toasts").append(t);
-  setTimeout(() => t.remove(), kind === "bad" ? 6000 : 2500);
+  const el = document.createElement("div");
+  el.className = "toast " + (kind || ""); el.textContent = m;
+  $("toasts").append(el);
+  setTimeout(() => el.remove(), kind === "bad" ? 6000 : 2500);
 }
-function stick() { document.documentElement.style.setProperty("--stick", $("top").offsetHeight + 14 + "px"); }
+function stick() { document.documentElement.style.setProperty("--stick", $("top").offsetHeight + 12 + "px"); }
 window.addEventListener("resize", stick);
 
 if (GAS) $("btnSettings").classList.add("hidden");
+applyLang();
 if (connected()) start(); else openSetup(true);
 </script>
 </body>
