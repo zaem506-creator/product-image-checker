@@ -69,19 +69,34 @@ var NOT_DONE = ["", "new"];
 
 /* ===================== قراءة ===================== */
 
+/* فتح رابط الـ Web App يعرض الأداة نفسها (ملف Index في نفس المشروع).
+   والصفحة تكلم السكربت مباشرة عن طريق apiRead / apiSave، وتسجيل دخول الشركة هو الحماية. */
 function doGet(e) {
   if (!e) return setup(); // تشغيل من المحرر بزر Run: يسوي الإعداد مهما كانت الدالة المختارة
   var p = e.parameter || {};
-  try {
-    if (!p.action) return out_({ ok: true, hint: "deployed" });
-    checkSecret_(p.key);
-    var sh = sheet_(), data = sh.getDataRange().getValues(), cols = columns_(data[0]);
-    if (p.action === "init") return out_(init_(sh, data, cols));
-    if (p.action === "tasks") return out_(tasks_(data, cols, p.agent, p.role));
-    return out_({ ok: false, error: "unknown action" });
-  } catch (err) {
-    return out_({ ok: false, error: String(err.message || err) });
+  if (!p.action) {
+    return HtmlService.createHtmlOutputFromFile("Index")
+      .setTitle("تدقيق الصور")
+      .addMetaTag("viewport", "width=device-width, initial-scale=1");
   }
+  // طريقة الملف المحلي (تحتاج نشر Anyone + كلمة سر)
+  try { checkSecret_(p.key); return out_(read_(p)); }
+  catch (err) { return out_({ ok: false, error: String(err.message || err) }); }
+}
+
+function apiRead(p) {
+  try { return read_(p || {}); } catch (err) { return { ok: false, error: String(err.message || err) }; }
+}
+
+function apiSave(req) {
+  try { return saveAll_(req || {}); } catch (err) { return { ok: false, error: String(err.message || err) }; }
+}
+
+function read_(p) {
+  var sh = sheet_(), data = sh.getDataRange().getValues(), cols = columns_(data[0]);
+  if (p.action === "init") return init_(sh, data, cols);
+  if (p.action === "tasks") return tasks_(data, cols, p.agent, p.role);
+  throw new Error("unknown action");
 }
 
 function init_(sh, data, cols) {
@@ -139,24 +154,24 @@ function doPost(e) {
   if (!e) return setup();
   var req;
   try { req = JSON.parse(e.postData.contents); } catch (err) { return out_({ ok: false, error: "bad request" }); }
+  try { checkSecret_(req.key); return out_(saveAll_(req)); }
+  catch (err) { return out_({ ok: false, error: String(err.message || err) }); }
+}
+
+function saveAll_(req) {
+  if (req.action !== "save" || !req.updates || !req.updates.length) return { ok: false, error: "nothing to save" };
+  var lock = LockService.getScriptLock();
+  lock.waitLock(20000);
   try {
-    checkSecret_(req.key);
-    if (req.action !== "save" || !req.updates || !req.updates.length) return out_({ ok: false, error: "nothing to save" });
-    var lock = LockService.getScriptLock();
-    lock.waitLock(20000);
-    try {
-      var sh = sheet_(), cols = columns_(sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0]);
-      var opts = { content: options_(sh, cols, "content"), quality: options_(sh, cols, "quality") };
-      var results = req.updates.map(function (u) {
-        try { return save_(sh, cols, opts, u); } catch (err) { return { id: u.id, ok: false, error: String(err.message || err) }; }
-      });
-      SpreadsheetApp.flush();
-      return out_({ ok: true, results: results });
-    } finally {
-      lock.releaseLock();
-    }
-  } catch (err) {
-    return out_({ ok: false, error: String(err.message || err) });
+    var sh = sheet_(), cols = columns_(sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0]);
+    var opts = { content: options_(sh, cols, "content"), quality: options_(sh, cols, "quality") };
+    var results = req.updates.map(function (u) {
+      try { return save_(sh, cols, opts, u); } catch (err) { return { id: u.id, ok: false, error: String(err.message || err) }; }
+    });
+    SpreadsheetApp.flush();
+    return { ok: true, results: results };
+  } finally {
+    lock.releaseLock();
   }
 }
 
