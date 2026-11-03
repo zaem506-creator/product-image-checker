@@ -114,7 +114,9 @@ textarea:focus,.setup input:focus,.jump input:focus{outline:2px solid var(--yell
 .ai .tag.good{background:var(--greenbg);color:var(--green)}
 .ai .tag.bad{background:var(--redbg);color:var(--red)}
 .ai p{margin:2px 0 0;color:var(--muted);direction:ltr;text-align:left;flex:1;line-height:1.5}
-.images{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start;direction:ltr} /* الترتيب ثابت باللغتين: القديمة يسار، Gemini في النص، Claude يمين */
+.images{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:14px;align-items:start;direction:ltr} /* عدد الأعمدة = عدد الصور الموجودة */
+.nopic{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;font-size:12.5px;color:var(--muted)}
+.nopic span{background:#f5efe4;border:1px dashed #dccfbb;border-radius:99px;padding:3px 10px} /* الترتيب ثابت باللغتين: القديمة يسار، Gemini في النص، Claude يمين */
 html[dir="rtl"] .card{direction:rtl}
 .card{--c:var(--muted);--cb:#f5efe4;background:var(--card);border:2px solid color-mix(in srgb,var(--c) 30%,#fff);border-radius:14px;padding:14px;
   box-shadow:0 1px 2px rgba(74,38,23,.04);min-width:0;transition:border-color .15s,box-shadow .15s}
@@ -132,7 +134,9 @@ html[dir="rtl"] .card{direction:rtl}
 .choose:focus{outline:none}
 .choose:focus-visible{outline:2px solid var(--c);outline-offset:2px}
 .frame{display:block;border-radius:8px;border:1px solid #f0e9df;background:#faf7f2;min-height:160px;cursor:zoom-in;overflow:hidden;position:relative}
-.frame:hover{border-color:var(--yellowd)}
+.frame:hover{border-color:var(--c)}
+.frame:focus{outline:none}
+.frame:focus-visible{outline:2px solid var(--c);outline-offset:2px}
 .frame img{display:block;width:100%;height:auto}
 .frame .msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#a99c92;font-size:13px;padding:10px;text-align:center}
 .meta{display:flex;justify-content:space-between;margin-top:7px;font-size:11px;color:#a99c92}
@@ -175,7 +179,7 @@ html[dir="rtl"] .card{direction:rtl}
   .tabs{padding-bottom:7px}
 }
 
-@media(max-width:1180px){.images{grid-template-columns:1fr 1fr}}
+@media(max-width:1180px){.images{grid-auto-flow:row;grid-template-columns:1fr 1fr}}
 @media(max-width:860px){
   .top{position:static}
   .eval{grid-template-columns:1fr}
@@ -248,6 +252,7 @@ html[dir="rtl"] .card{direction:rtl}
 
     <section>
       <div class="ai hidden" id="ai"><span class="tag" id="aiTag"></span><p id="aiText"></p></div>
+      <div class="nopic hidden" id="nopic"></div>
       <div class="images">
         <div class="card" data-img="old"><h4 data-i18n="imgOld"></h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span data-i18n="imgHint"></span><span></span></div><button class="choose" type="button"></button></div>
         <div class="card" data-img="gemini"><h4 data-i18n="imgGemini"></h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span data-i18n="imgHint"></span><span></span></div><button class="choose" type="button"></button></div>
@@ -304,7 +309,7 @@ const I18N = {
     imgOld: "الصورة القديمة (Old)", imgClaude: "صورة Claude", imgGemini: "صورة Gemini", imgHint: "انقر للتكبير بالدقة الكاملة",
     imgLoading: "جار التحميل…", imgNone: "لا يوجد رابط", imgError: "تعذر تحميل الصورة، انقر لفتح الرابط", lbError: "تعذر تحميل الصورة",
     aiPick: "اختيار الفرز الآلي", aiNone: "لا يوجد قرار آلي",
-    choose: "اختيار", chosen: "✓ تم الاختيار",
+    choose: "اختيار", chosen: "✓ تم الاختيار", noPic: "لا توجد صورة {name} لهذا المنتج",
     zoomOut: "تصغير", zoomIn: "تكبير", fit: "ملء الشاشة", real: "الحجم الحقيقي 1:1", openTab: "فتح في تبويب جديد", close: "إغلاق (Esc)",
     lbHelp: "عجلة الماوس للتكبير · اسحب للتحريك · انقر مرتين للتبديل بين ملء الشاشة و1:1 · <kbd>←</kbd><kbd>→</kbd> أو <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> للتنقل بين الصور على <b>الموضع والتكبير نفسيهما</b> · <kbd>Esc</kbd> للإغلاق",
     last: "هذا آخر منتج", copied: "تم نسخ الكود", notFound: "لم يتم العثور على المنتج ضمن منتجاتك", refreshed: "تم التحديث من الشيت",
@@ -338,7 +343,7 @@ const I18N = {
     imgOld: "Old image", imgClaude: "Claude image", imgGemini: "Gemini image", imgHint: "Click to zoom at full resolution",
     imgLoading: "Loading…", imgNone: "No link", imgError: "Couldn't load the image. Click to open the link.", lbError: "Couldn't load the image",
     aiPick: "AI pick", aiNone: "No AI decision",
-    choose: "Choose", chosen: "✓ Chosen",
+    choose: "Choose", chosen: "✓ Chosen", noPic: "No {name} image for this product",
     zoomOut: "Zoom out", zoomIn: "Zoom in", fit: "Fit to screen", real: "Actual size 1:1", openTab: "Open in new tab", close: "Close (Esc)",
     lbHelp: "Scroll to zoom · drag to pan · double-click to switch between fit and 1:1 · <kbd>←</kbd><kbd>→</kbd> or <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> to switch images at the <b>same spot and zoom</b> · <kbd>Esc</kbd> to close",
     last: "This is the last product", copied: "Code copied", notFound: "That product isn't in your list", refreshed: "Reloaded from the sheet",
@@ -669,7 +674,7 @@ function renderChips() {
   for (const card of document.querySelectorAll(".card")) {
     const v = infoFor(card.dataset.img), btn = card.querySelector(".choose");
     const on = !!v && task.info === v;
-    btn.classList.toggle("hidden", !v || !task[card.dataset.img]);
+    btn.classList.toggle("hidden", !v || isMissing(task, card.dataset.img));
     btn.setAttribute("aria-pressed", String(on));
     btn.textContent = t(on ? "chosen" : "choose");
     card.classList.toggle("chosen", on);
@@ -708,12 +713,13 @@ function go(i, keepImages) {
 
   for (const card of document.querySelectorAll(".card")) {
     const k = card.dataset.img;
-    if (!keepImages) setImage(card, task[k]);
+    if (!keepImages) setImage(card, task, k);
     let badge = card.querySelector(".badge");
     if (k === pick && !badge) { badge = document.createElement("span"); badge.className = "badge"; card.querySelector("h4").append(badge); }
     if (k !== pick && badge) badge.remove();
     if (badge && k === pick) badge.textContent = t("aiPick");
   }
+  renderNoPic();
   if (!keepImages) { preload(idx + 1); preload(idx + 2); }
   if (moved && !keepImages) { clearTimeout(go.pt); go.pt = setTimeout(ping, 1500); }
 }
@@ -726,22 +732,51 @@ for (const card of document.querySelectorAll(".card")) {
   });
 }
 
-function setImage(card, url) {
+/* الصورة اللي ما لها رابط أو ما انفتحت (مثلاً Claude ما سوى صورة للمنتج) تختفي، والباقي ياخذ مكانها.
+   task.missing يتذكرها، عشان ما تظهر وتختفي كل مرة، ويعرفها العارض. */
+const IMG_KEYS = ["old", "gemini", "claude"];
+const isMissing = (task, k) => !task[k] || !!(task.missing && task.missing[k]);
+function markMissing(task, k) { (task.missing || (task.missing = {}))[k] = true; }
+
+function setImage(card, task, k) {
+  const url = task[k];
   const a = card.querySelector("a"), img = card.querySelector("img"), msg = card.querySelector(".msg"), size = card.querySelector(".meta span:last-child");
   size.textContent = "";
   img.onload = img.onerror = null;
-  if (!url) { a.removeAttribute("href"); img.removeAttribute("src"); img.style.display = "none"; msg.textContent = t("imgNone"); return; }
+  card.classList.toggle("hidden", isMissing(task, k));
+  if (isMissing(task, k)) { a.removeAttribute("href"); img.removeAttribute("src"); return; }
   a.href = url;
   msg.textContent = t("imgLoading");
   img.style.display = "";
   img.onload = () => { msg.textContent = ""; size.textContent = img.naturalWidth + "×" + img.naturalHeight; };
-  img.onerror = () => { img.style.display = "none"; msg.textContent = t("imgError"); };
+  img.onerror = () => {
+    markMissing(task, k);
+    if (tasks[idx] !== task) return;
+    card.classList.add("hidden");
+    renderNoPic();
+    renderChips();
+    if (!$("lb").classList.contains("hidden") && lb.key === k) { const keys = viewerKeys(); if (keys.length) showInViewer(keys[0]); else closeViewer(); }
+  };
   img.src = url;
+}
+
+function renderNoPic() {
+  const task = tasks[idx], box = $("nopic");
+  box.innerHTML = "";
+  const gone = IMG_KEYS.filter((k) => isMissing(task, k));
+  box.classList.toggle("hidden", !gone.length);
+  for (const k of gone) { const sp = document.createElement("span"); sp.textContent = t("noPic", { name: k === "old" ? (rtl() ? "الأصل" : "original") : IMG_NAMES[k] }); box.append(sp); }
 }
 
 function preload(i) {
   const x = tasks[i];
-  if (x) for (const u of [x.old, x.claude, x.gemini]) if (u) new Image().src = u;
+  if (!x) return;
+  for (const k of IMG_KEYS) {
+    if (isMissing(x, k)) continue;
+    const im = new Image();
+    im.onerror = () => markMissing(x, k);
+    im.src = x[k];
+  }
 }
 
 function renderProgress() {
@@ -819,7 +854,7 @@ document.addEventListener("keydown", (e) => {
   else if (e.key === prevArrow()) { e.preventDefault(); if (idx > 0) go(idx - 1); }
   else if (e.key.toLowerCase() === "n") { e.preventDefault(); nextTodo(); }
   else if (e.key.toLowerCase() === "c") { e.preventDefault(); $("txtComments").focus(); }
-  else if (e.key.toLowerCase() === "z") { e.preventDefault(); const x = tasks[idx]; const k = ["claude", "gemini", "old"].find((y) => x[y]); if (k) openViewer(k); }
+  else if (e.key.toLowerCase() === "z") { e.preventDefault(); const k = ["claude", "gemini", "old"].find((y) => !isMissing(tasks[idx], y)); if (k) openViewer(k); }
 });
 
 /* ---------------- عارض التكبير ----------------
@@ -838,7 +873,7 @@ function closeViewer() {
   $("lb").classList.add("hidden");
   document.body.style.overflow = "";
 }
-function viewerKeys() { const x = tasks[idx]; return ["old", "gemini", "claude"].filter((k) => x && x[k]); }
+function viewerKeys() { const x = tasks[idx]; return x ? IMG_KEYS.filter((k) => !isMissing(x, k)) : []; }
 
 function showInViewer(key) {
   const url = tasks[idx][key];
