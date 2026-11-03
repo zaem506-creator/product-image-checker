@@ -121,6 +121,25 @@ textarea:focus,.setup input:focus,.jump input:focus{outline:2px solid var(--yell
 .toast.good{background:var(--green)}
 @keyframes in{from{transform:translateY(8px);opacity:0}}
 
+/* عارض التكبير */
+.lb{position:fixed;inset:0;z-index:40;background:#1b120d;display:flex;flex-direction:column;color:#f3e9dc}
+.lb-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#2a1d15;flex-wrap:wrap}
+.lb-tabs{display:flex;gap:6px}
+.lb-tab{border:1px solid #4a372b;background:transparent;color:#cdbcaa;border-radius:999px;padding:6px 14px;font-weight:700;font-size:13.5px;cursor:pointer;display:flex;gap:6px;align-items:center}
+.lb-tab[aria-selected="true"]{background:var(--yellow);border-color:var(--yellowd);color:var(--text)}
+.lb-tab kbd{background:transparent;border-color:currentColor;color:inherit;opacity:.7}
+.lb-bar .grow{flex:1}
+.lb-zoom{font:600 13px Consolas,monospace;min-width:52px;text-align:center;direction:ltr}
+.lb-btn{border:1px solid #4a372b;background:#3a2a1f;color:#f3e9dc;border-radius:8px;padding:6px 11px;font-weight:700;font-size:13px;cursor:pointer;text-decoration:none}
+.lb-btn:hover{background:#4a372b}
+.lb-stage{flex:1;position:relative;overflow:hidden;cursor:grab;touch-action:none;background:#fff}
+.lb-stage.drag{cursor:grabbing}
+.lb-stage img{position:absolute;left:0;top:0;transform-origin:0 0;max-width:none;user-select:none;-webkit-user-drag:none;image-rendering:auto}
+.lb-stage.pixel img{image-rendering:pixelated}
+.lb-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#8b7666}
+.lb-help{padding:6px 14px;font-size:12px;color:#a8957f;background:#2a1d15}
+.lb-help kbd{background:transparent;color:inherit;border-color:#5a4535}
+
 @media(max-width:1180px){.images{grid-template-columns:1fr 1fr}}
 @media(max-width:860px){
   .top{position:static}
@@ -195,13 +214,32 @@ textarea:focus,.setup input:focus,.jump input:focus{outline:2px solid var(--yell
     <section>
       <div class="ai hidden" id="ai"><span class="tag" id="aiTag"></span><p id="aiText"></p></div>
       <div class="images">
-        <div class="card" data-img="old"><h4>الصورة القديمة (Old)</h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span>اضغط لفتحها بكامل الدقة</span><span></span></div></div>
-        <div class="card" data-img="claude"><h4>صورة كلود (Claude)</h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span>اضغط لفتحها بكامل الدقة</span><span></span></div></div>
-        <div class="card" data-img="gemini"><h4>صورة جيمني (Gemini)</h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span>اضغط لفتحها بكامل الدقة</span><span></span></div></div>
+        <div class="card" data-img="old"><h4>الصورة القديمة (Old)</h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span>اضغط للتكبير بكامل الدقة</span><span></span></div></div>
+        <div class="card" data-img="claude"><h4>صورة كلود (Claude)</h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span>اضغط للتكبير بكامل الدقة</span><span></span></div></div>
+        <div class="card" data-img="gemini"><h4>صورة جيمني (Gemini)</h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span>اضغط للتكبير بكامل الدقة</span><span></span></div></div>
       </div>
     </section>
   </div>
 </main>
+
+<div class="lb hidden" id="lb" role="dialog" aria-label="عارض الصور">
+  <div class="lb-bar">
+    <div class="lb-tabs" id="lbTabs"></div>
+    <div class="grow"></div>
+    <button class="lb-btn" id="lbOut" title="تصغير">−</button>
+    <span class="lb-zoom" id="lbZoom">100%</span>
+    <button class="lb-btn" id="lbIn" title="تكبير">+</button>
+    <button class="lb-btn" id="lbFit" title="ملء الشاشة">ملء الشاشة</button>
+    <button class="lb-btn" id="lbReal" title="الحجم الحقيقي (كل بكسل بكسل)">الحجم الحقيقي 1:1</button>
+    <a class="lb-btn" id="lbOpen" target="_blank" rel="noopener">فتح في تبويب جديد</a>
+    <button class="lb-btn" id="lbClose" title="إغلاق (Esc)">✕</button>
+  </div>
+  <div class="lb-stage" id="lbStage"><img id="lbImg" alt=""><div class="lb-msg" id="lbMsg"></div></div>
+  <div class="lb-help">
+    عجلة الماوس للتكبير · اسحب للتحريك · دبل كلك بين ملء الشاشة و 1:1 ·
+    <kbd>←</kbd><kbd>→</kbd> أو <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> للتنقل بين الصور على <b>نفس المكان ونفس التكبير</b> · <kbd>Esc</kbd> إغلاق
+  </div>
+</div>
 
 <div class="toasts" id="toasts"></div>
 
@@ -442,7 +480,7 @@ function buildChips() {
   };
   make($("verdicts"), options.cur.verdict, "verdict");
   make($("infos"), options.cur.info, "info");
-  $("keys").innerHTML = "اختصارات: <kbd>1</kbd>–<kbd>" + (n - 1) + "</kbd> اختيار &nbsp; <kbd>←</kbd> التالي &nbsp; <kbd>→</kbd> السابق<br><kbd>N</kbd> التالي غير المُقيَّم &nbsp; <kbd>C</kbd> الملاحظات &nbsp; <kbd>Esc</kbd> خروج من الكتابة";
+  $("keys").innerHTML = "اختصارات: <kbd>1</kbd>–<kbd>" + (n - 1) + "</kbd> اختيار &nbsp; <kbd>←</kbd> التالي &nbsp; <kbd>→</kbd> السابق<br><kbd>N</kbd> التالي غير المُقيَّم &nbsp; <kbd>C</kbd> الملاحظات &nbsp; <kbd>Z</kbd> تكبير الصور<br><kbd>Esc</kbd> خروج من الكتابة";
 }
 
 function pickChip(field, v, toggle) {
@@ -491,6 +529,14 @@ function go(i) {
     if (k !== pick && badge) badge.remove();
   }
   preload(idx + 1); preload(idx + 2);
+}
+
+for (const card of document.querySelectorAll(".card")) {
+  card.querySelector("a").addEventListener("click", (e) => {
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return; // Ctrl+كلك يفتح تبويب جديد عادي
+    e.preventDefault();
+    if (tasks[idx] && tasks[idx][card.dataset.img]) openViewer(card.dataset.img);
+  });
 }
 
 function setImage(card, url) {
@@ -571,6 +617,7 @@ $("btnRefresh").onclick = async () => {
 };
 
 document.addEventListener("keydown", (e) => {
+  if (!$("lb").classList.contains("hidden")) return viewerKey(e);
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   const typing = /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName);
   if (typing) { if (e.key === "Escape") document.activeElement.blur(); return; }
@@ -581,7 +628,130 @@ document.addEventListener("keydown", (e) => {
   else if (e.key === "ArrowRight") { e.preventDefault(); if (idx > 0) go(idx - 1); }
   else if (e.key.toLowerCase() === "n") { e.preventDefault(); nextTodo(); }
   else if (e.key.toLowerCase() === "c") { e.preventDefault(); $("txtComments").focus(); }
+  else if (e.key.toLowerCase() === "z") { e.preventDefault(); const t = tasks[idx]; const k = ["claude", "gemini", "old"].find((x) => t[x]); if (k) openViewer(k); }
 });
+
+/* ---------------- عارض التكبير ----------------
+   view = مكان النظر كنسبة من الصورة (cx, cy) + التكبير نسبةً لملء الشاشة (rel).
+   لما تتنقل بين الصور يبقى نفس المكان ونفس التكبير، حتى لو مقاسات الصور مختلفة. */
+const IMG_NAMES = { old: "Old", claude: "Claude", gemini: "Gemini" };
+const lb = { key: "", view: null, nw: 0, nh: 0, s: 1, x: 0, y: 0 };
+
+function openViewer(key) {
+  $("lb").classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+  lb.view = null; lb.nw = 0;
+  showInViewer(key);
+}
+function closeViewer() {
+  $("lb").classList.add("hidden");
+  document.body.style.overflow = "";
+}
+function viewerKeys() { const t = tasks[idx]; return ["old", "claude", "gemini"].filter((k) => t && t[k]); }
+
+function showInViewer(key) {
+  const t = tasks[idx], url = t[key];
+  lb.key = key;
+  const tabs = $("lbTabs");
+  tabs.innerHTML = "";
+  viewerKeys().forEach((k, i) => {
+    const b = document.createElement("button");
+    b.className = "lb-tab"; b.setAttribute("aria-selected", String(k === key));
+    const kb = document.createElement("kbd"); kb.textContent = i + 1;
+    b.append(kb, IMG_NAMES[k]);
+    b.onclick = () => showInViewer(k);
+    tabs.append(b);
+  });
+  $("lbOpen").href = url;
+  const img = $("lbImg");
+  if (lb.nw) lb.view = currentView();
+  $("lbMsg").textContent = "جاري التحميل…";
+  img.style.visibility = "hidden";
+  img.onload = () => {
+    lb.nw = img.naturalWidth; lb.nh = img.naturalHeight;
+    $("lbMsg").textContent = "";
+    img.style.visibility = "";
+    applyView(lb.view || { cx: 0.5, cy: 0.5, rel: 1 });
+  };
+  img.onerror = () => { $("lbMsg").textContent = "تعذر تحميل الصورة"; };
+  img.src = url;
+  if (img.complete && img.naturalWidth) img.onload();
+}
+
+function stageSize() { const r = $("lbStage").getBoundingClientRect(); return { w: r.width, h: r.height }; }
+function fitScale() { const { w, h } = stageSize(); return Math.min(w / lb.nw, h / lb.nh); }
+function currentView() {
+  const { w, h } = stageSize();
+  return { cx: (w / 2 - lb.x) / lb.s / lb.nw, cy: (h / 2 - lb.y) / lb.s / lb.nh, rel: lb.s / fitScale() };
+}
+function applyView(v) {
+  const { w, h } = stageSize();
+  lb.s = Math.min(Math.max(v.rel * fitScale(), 0.05), 16);
+  lb.x = w / 2 - v.cx * lb.nw * lb.s;
+  lb.y = h / 2 - v.cy * lb.nh * lb.s;
+  render();
+}
+function zoomAt(factor, px, py) {
+  const { w, h } = stageSize();
+  if (px == null) { px = w / 2; py = h / 2; }
+  const ns = Math.min(Math.max(lb.s * factor, 0.05), 16);
+  lb.x = px - (px - lb.x) * (ns / lb.s);
+  lb.y = py - (py - lb.y) * (ns / lb.s);
+  lb.s = ns;
+  render();
+}
+function render() {
+  $("lbImg").style.transform = "translate(" + lb.x + "px," + lb.y + "px) scale(" + lb.s + ")";
+  $("lbZoom").textContent = Math.round(lb.s * 100) + "%";
+  $("lbStage").classList.toggle("pixel", lb.s >= 3);
+}
+function setFit() { applyView({ cx: 0.5, cy: 0.5, rel: 1 }); }
+function setReal(px, py) {
+  const { w, h } = stageSize();
+  if (px == null) { px = w / 2; py = h / 2; }
+  zoomAt(1 / lb.s, px, py);
+}
+function switchImage(step) {
+  const keys = viewerKeys();
+  showInViewer(keys[(keys.indexOf(lb.key) + step + keys.length) % keys.length]);
+}
+
+$("lbClose").onclick = closeViewer;
+$("lbFit").onclick = setFit;
+$("lbReal").onclick = () => setReal();
+$("lbIn").onclick = () => zoomAt(1.25);
+$("lbOut").onclick = () => zoomAt(0.8);
+$("lbStage").addEventListener("wheel", (e) => {
+  e.preventDefault();
+  const r = $("lbStage").getBoundingClientRect();
+  zoomAt(Math.exp(-e.deltaY * 0.0015), e.clientX - r.left, e.clientY - r.top);
+}, { passive: false });
+$("lbStage").addEventListener("dblclick", (e) => {
+  const r = $("lbStage").getBoundingClientRect();
+  if (Math.abs(lb.s - fitScale()) < 0.01) setReal(e.clientX - r.left, e.clientY - r.top); else setFit();
+});
+(() => {
+  let drag = null;
+  const st = $("lbStage");
+  st.addEventListener("pointerdown", (e) => { drag = { x: e.clientX - lb.x, y: e.clientY - lb.y }; st.setPointerCapture(e.pointerId); st.classList.add("drag"); });
+  st.addEventListener("pointermove", (e) => { if (!drag) return; lb.x = e.clientX - drag.x; lb.y = e.clientY - drag.y; render(); });
+  const end = () => { drag = null; st.classList.remove("drag"); };
+  st.addEventListener("pointerup", end); st.addEventListener("pointercancel", end);
+})();
+window.addEventListener("resize", () => { if (!$("lb").classList.contains("hidden") && lb.nw) applyView(currentView()); });
+
+function viewerKey(e) {
+  const k = e.key;
+  if (k === "Escape") closeViewer();
+  else if (k === "ArrowLeft") switchImage(1);
+  else if (k === "ArrowRight") switchImage(-1);
+  else if (/^[1-3]$/.test(k)) { const keys = viewerKeys(); if (keys[k - 1]) showInViewer(keys[k - 1]); }
+  else if (k === "+" || k === "=") zoomAt(1.25);
+  else if (k === "-") zoomAt(0.8);
+  else if (k === "0") setFit();
+  else return;
+  e.preventDefault();
+}
 
 /* ---------------- الإعدادات ---------------- */
 function openSetup(required) {
