@@ -97,29 +97,41 @@ function apiPing(p) {
 }
 
 /* ===================== المتصلون الآن =====================
-   كل صفحة مفتوحة ترسل نبضة كل 30 ثانية فيها اسم الموظف ورقم المنتج اللي واقف عليه.
-   تنحفظ في الذاكرة المؤقتة (CacheService) لمدة دقيقتين، وما تكتب في الشيت ولا تنتظر القفل. */
-var ONLINE_MS = 75 * 1000;
+   كل صفحة مفتوحة لها رقم خاص (client) وترسل نبضة كل 25 ثانية فيها: حساب قوقل اللي فاتحها،
+   واسم الموظف اللي مختاره الحين، ورقم المنتج. لما ينتقل لاسم ثاني، يتحدث نفس السجل بدل ما ينضاف سجل جديد.
+   كل شي في الذاكرة المؤقتة (CacheService)، ما يكتب في الشيت ولا ينتظر قفل الحفظ. */
+var ONLINE_MS = 60 * 1000;
 
 function ping_(p) {
+  var email = "";
+  try { email = Session.getActiveUser().getEmail() || ""; } catch (e) {}
   var cache = CacheService.getScriptCache();
-  if (p.name && p.role) {
-    var email = "";
-    try { email = Session.getActiveUser().getEmail(); } catch (e) {}
-    cache.put("p|" + p.role + "|" + clean_(p.name), JSON.stringify({ t: Date.now(), pos: Number(p.pos) || 0, total: Number(p.total) || 0, email: email }), 120);
+  var lock = LockService.getDocumentLock() || LockService.getUserLock();
+  var map = {}, now = Date.now();
+  if (lock.tryLock(3000)) {
+    try {
+      map = JSON.parse(cache.get("online") || "{}");
+      Object.keys(map).forEach(function (k) { if (now - map[k].t > ONLINE_MS) delete map[k]; });
+      if (p.client) {
+        if (p.leave) delete map[p.client];
+        else map[p.client] = { t: now, email: email, agent: clean_(p.name || ""), role: p.role || "", pos: Number(p.pos) || 0, total: Number(p.total) || 0 };
+      }
+      cache.put("online", JSON.stringify(map), 600);
+    } finally {
+      lock.releaseLock();
+    }
+  } else {
+    map = JSON.parse(cache.get("online") || "{}");
   }
-  var names = [];
-  try { names = JSON.parse(p.names || "[]"); } catch (e) {}
-  var keys = names.slice(0, 100).map(function (k) { return "p|" + k; });
-  var got = keys.length ? cache.getAll(keys) : {};
-  var now = Date.now(), online = [];
-  Object.keys(got).forEach(function (k) {
-    var v = JSON.parse(got[k]);
+  // شخص واحد = حساب واحد، حتى لو فاتح الأداة في أكثر من تبويب (ناخذ آخر نشاط)
+  var people = {};
+  Object.keys(map).forEach(function (k) {
+    var v = map[k];
     if (now - v.t > ONLINE_MS) return;
-    var parts = k.split("|");
-    online.push({ role: parts[1], name: parts.slice(2).join("|"), pos: v.pos, total: v.total, email: v.email });
+    var id = v.email || "client:" + k;
+    if (!people[id] || people[id].t < v.t) people[id] = v;
   });
-  return { ok: true, online: online };
+  return { ok: true, me: email, online: Object.keys(people).map(function (k) { return people[k]; }) };
 }
 
 function read_(p) {

@@ -301,7 +301,7 @@ const I18N = {
     refresh: "⟳ تحديث", refreshTitle: "تحديث البيانات من الشيت", settingsTitle: "إعدادات الاتصال", langBtn: "English",
     offline: "غير متصل", connected: "متصل", saving: "جار الحفظ…", saved: "تم الحفظ تلقائيا {time}",
     retry: "تعذر الحفظ، تجري إعادة المحاولة… ({n})", noNetSave: "لا يوجد اتصال بالإنترنت، وسيتم الحفظ عند عودته ({n})",
-    onlineNow: "متصل الآن:", onlineTip: "متصل الآن — المنتج {pos} من {total}",
+    onlineNow: "متصل الآن:", viewing: "يعمل على: {agent} ({role}) · المنتج {pos} من {total}", notPicked: "فتح الأداة ولم يختر اسما بعد", you: "أنت", someone: "مستخدم",
     setupH: "الاتصال بـ Google Sheets", setupP: "الصق رابط تطبيق الويب وكلمة المرور التي زودك بها المشرف. تحفظ في هذا المتصفح فقط.",
     setupUrl: "رابط تطبيق الويب (ينتهي بـ /exec)", setupKey: "كلمة المرور (API_KEY)", connect: "اتصال", cancel: "إلغاء",
     loadingH: "جار التحميل…", loadingP: "يجري جلب البيانات من Google Sheets",
@@ -336,7 +336,7 @@ const I18N = {
     refresh: "⟳ Refresh", refreshTitle: "Reload data from the sheet", settingsTitle: "Connection settings", langBtn: "العربية",
     offline: "Offline", connected: "Connected", saving: "Saving…", saved: "Saved automatically {time}",
     retry: "Couldn't save, retrying… ({n})", noNetSave: "No internet; will save when it's back ({n})",
-    onlineNow: "Online now:", onlineTip: "Online now — product {pos} of {total}",
+    onlineNow: "Online now:", viewing: "Working on: {agent} ({role}) · product {pos} of {total}", notPicked: "Opened the tool, no name picked yet", you: "you", someone: "User",
     setupH: "Connect to Google Sheets", setupP: "Paste the web app link and password from your supervisor. They're saved in this browser only.",
     setupUrl: "Web app link (ends with /exec)", setupKey: "Password (API_KEY)", connect: "Connect", cancel: "Cancel",
     loadingH: "Loading…", loadingP: "Fetching data from Google Sheets",
@@ -523,34 +523,40 @@ window.addEventListener("beforeunload", (e) => {
 });
 
 /* ---------------- المتصلون الآن ----------------
-   نبضة كل 30 ثانية: ترسل اسم الموظف المختار ورقم المنتج، وترجع قائمة اللي فاتحين الأداة الحين. */
-let online = [], pingTimer = 0;
-const agentKey = (a) => a.role + "|" + a.name;
+   كل صفحة لها رقم خاص، وترسل نبضة كل 25 ثانية: الاسم المختار الحين ورقم المنتج.
+   السكربت يعرف الشخص من حساب قوقل، فالانتقال بين الأسماء ما يخلي كل الأسماء "متصلة". */
+const CLIENT = Math.random().toString(36).slice(2) + Date.now().toString(36);
+let online = [], me = "", pingTimer = 0;
 async function ping() {
   clearTimeout(pingTimer);
-  pingTimer = setTimeout(ping, 30000);
+  pingTimer = setTimeout(ping, 25000);
   if (!agents.length || document.hidden) return;
   try {
-    const me = cur ? { name: cur.agent, role: cur.role, pos: idx + 1, total: tasks.length } : {};
-    const res = await api({ action: "ping", ...me, names: JSON.stringify(agents.map(agentKey)) });
-    online = res.online || [];
+    const mine = cur ? { name: cur.agent, role: cur.role, pos: idx + 1, total: tasks.length } : {};
+    const res = await api({ action: "ping", client: CLIENT, ...mine });
+    online = res.online || []; me = res.me || "";
     renderOnline();
-    renderTabs();
   } catch {}
 }
 document.addEventListener("visibilitychange", () => { if (!document.hidden) ping(); });
+window.addEventListener("pagehide", () => { try { if (agents.length) api({ action: "ping", client: CLIENT, leave: 1 }); } catch {} });
 
-function onlineOf(a) { return online.find((o) => o.name === a.name && o.role === a.role); }
+// mishal.altuwaim@hungerstation.com ← Mishal Altuwaim
+function personName(email) {
+  if (!email) return t("someone");
+  return email.split("@")[0].split(/[._-]+/).filter(Boolean).map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
+}
 function renderOnline() {
   const box = $("online");
   box.innerHTML = "";
   box.classList.toggle("hidden", !online.length);
   if (!online.length) return;
   box.append(t("onlineNow"));
-  for (const o of online) {
+  const list = [...online].sort((a, b) => (b.email === me) - (a.email === me));
+  for (const o of list) {
     const i = document.createElement("i");
-    i.textContent = o.name;
-    i.title = t(o.role) + " · " + t("onlineTip", { pos: o.pos, total: o.total }) + (o.email ? "\n" + o.email : "");
+    i.textContent = personName(o.email) + (me && o.email === me ? " (" + t("you") + ")" : "");
+    i.title = (o.agent ? t("viewing", { agent: o.agent, role: t(o.role), pos: o.pos, total: o.total }) : t("notPicked")) + (o.email ? "\n" + o.email : "");
     box.append(i);
   }
 }
@@ -589,8 +595,6 @@ function renderTabs() {
     b.className = "tab" + (a.done >= a.total ? " complete" : "");
     b.setAttribute("role", "tab");
     b.setAttribute("aria-selected", String(!!cur && cur.agent === a.name && cur.role === a.role));
-    const o = onlineOf(a);
-    if (o) { const d = document.createElement("span"); d.className = "dot"; b.title = t("onlineTip", { pos: o.pos, total: o.total }); b.append(d); }
     b.append(a.name);
     const role = document.createElement("small"); role.textContent = t(a.role);
     const count = document.createElement("span"); count.className = "count"; count.textContent = a.done + "/" + a.total;
