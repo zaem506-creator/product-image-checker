@@ -18,7 +18,7 @@ var COLS = {
   old: "Old Nutrition Link",
   claude: "Claude Nutrition link",
   gemini: "Gemini Nutrition Link",
-  aiDecision: "Cloud Decision",
+  aiDecision: ["Claude Decision", "Cloud Decision"], // أي اسم من الاثنين
   aiComment: "Claude Comment",
   cAgent: "Content Agent",
   cVerdict: "Content Verdict",
@@ -75,7 +75,7 @@ function init_(sh, data, cols) {
     title: SpreadsheetApp.getActiveSpreadsheet().getName(),
     agents: list,
     options: { content: options_(sh, cols, "content"), quality: options_(sh, cols, "quality") },
-    missing: Object.keys(COLS).filter(function (k) { return cols[k] < 0 && !/SavedAt$/.test(k); }).map(function (k) { return COLS[k]; }),
+    missing: Object.keys(COLS).filter(function (k) { return cols[k] < 0 && !/SavedAt$/.test(k); }).map(function (k) { return [].concat(COLS[k])[0]; }),
   };
 }
 
@@ -172,7 +172,10 @@ function findRow_(sh, cols, row, code) {
 function columns_(header) {
   var norm = header.map(norm_);
   var cols = {};
-  Object.keys(COLS).forEach(function (k) { cols[k] = norm.indexOf(norm_(COLS[k])); });
+  Object.keys(COLS).forEach(function (k) {
+    cols[k] = -1;
+    [].concat(COLS[k]).some(function (name) { cols[k] = norm.indexOf(norm_(name)); return cols[k] >= 0; });
+  });
   // يوجد عمودان باسم Info: كل واحد يتبع عمود الـ Verdict اللي قبله
   cols.cInfo = infoAfter_(norm, cols.cVerdict, cols.cComments);
   cols.qInfo = infoAfter_(norm, cols.qVerdict, cols.qComments);
