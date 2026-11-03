@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تدقيق الصور - Local Shop</title>
+<style>
+:root{--bg:#fdfaf4;--card:#fff;--line:#eee5d6;--text:#4a2617;--muted:#8b7666;--yellow:#ffd400;--yellowd:#e8b800;
+  --green:#1f8a4c;--greenbg:#e7f6ed;--red:#c0392b;--redbg:#fdecea;--blue:#2563eb;--bluebg:#eaf1ff}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Tahoma,Arial,sans-serif;font-size:15px;border-top:5px solid var(--yellow);min-height:100vh}
+button{font-family:inherit}
+.hidden{display:none !important}
+kbd{display:inline-block;min-width:18px;padding:0 5px;border:1px solid #dccfbb;border-bottom-width:2px;border-radius:5px;background:#fffdf9;
+  font:600 11px/16px Consolas,monospace;color:var(--muted);text-align:center}
+
+/* الشريط العلوي */
+.top{background:#fffdf9;border-bottom:1px solid var(--line);box-shadow:0 1px 3px rgba(74,38,23,.05);position:sticky;top:0;z-index:20}
+.bar{max-width:1600px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand b{display:block;font-size:16px;line-height:1.2}
+.brand span{display:block;font-size:11.5px;color:var(--muted)}
+.spacer{flex:1}
+.status{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:6px 12px;border-radius:999px;background:#f5efe4;color:var(--muted);white-space:nowrap}
+.status::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.status.saving{background:var(--bluebg);color:var(--blue)}
+.status.saving::before{animation:pulse 1s infinite}
+.status.saved{background:var(--greenbg);color:var(--green)}
+.status.error{background:var(--redbg);color:var(--red)}
+@keyframes pulse{50%{opacity:.25}}
+.btn{background:#fffdf9;color:#3b2417;border:1px solid #e8dfd2;border-radius:999px;padding:8px 16px;font-weight:700;font-size:14px;cursor:pointer;
+  box-shadow:0 1px 2px rgba(74,38,23,.05);white-space:nowrap}
+.btn:hover{background:#fbf5ea;border-color:#dccfbb}
+.btn:disabled{opacity:.45;cursor:default}
+.btn.primary{background:var(--yellow);border-color:var(--yellowd)}
+.btn.primary:hover{background:var(--yellowd)}
+.btn.icon{padding:8px 11px}
+
+/* أسماء الموظفين */
+.tabs{max-width:1600px;margin:0 auto;padding:0 16px 10px;display:flex;gap:6px;flex-wrap:wrap}
+.tab{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:6px 8px 6px 14px;
+  font-weight:700;font-size:14px;cursor:pointer;transition:.15s}
+.tab:hover{background:#f7efe0;color:var(--text)}
+.tab small{font-weight:600;font-size:11px;padding:2px 7px;border-radius:999px;background:#f5efe4}
+.tab .count{font:600 12px Consolas,monospace;color:var(--muted)}
+.tab[aria-selected="true"]{background:var(--yellow);border-color:var(--yellowd);color:var(--text);box-shadow:0 2px 0 var(--yellowd)}
+.tab[aria-selected="true"] small{background:rgba(255,255,255,.6)}
+.tab.complete .count{color:var(--green)}
+
+.stage{max-width:1600px;margin:0 auto;padding:18px 16px 40px}
+
+/* رسائل */
+.notice{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:40px 20px;text-align:center;color:var(--muted)}
+.notice h2{color:var(--text);margin:0 0 8px}
+.warn{background:#fff8e1;border:1px solid #f5d77a;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13.5px}
+.err{background:var(--redbg);border:1px solid #f3c2bc;color:var(--red);border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:14px;white-space:pre-line}
+
+/* الإعدادات */
+.setup{max-width:560px;margin:30px auto;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px}
+.setup h2{margin:0 0 6px}
+.setup p{color:var(--muted);margin:0 0 18px;font-size:14px}
+.setup label{display:block;font-weight:700;font-size:13.5px;margin:12px 0 6px}
+.setup input{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;font:14px Consolas,monospace;direction:ltr}
+.setup .row{display:flex;gap:10px;margin-top:18px}
+
+/* التقييم */
+.eval{display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start}
+.form{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 1px 2px rgba(74,38,23,.04);
+  position:sticky;top:var(--stick,120px);max-height:calc(100vh - var(--stick,120px) - 12px);overflow:auto}
+.head{padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.head h3{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:8px}
+.code{display:flex;align-items:center;gap:6px;font:600 13px Consolas,monospace;direction:ltr;justify-content:flex-end}
+.code button{border:0;background:#f5efe4;border-radius:6px;cursor:pointer;font-size:12px;padding:3px 7px;color:var(--muted)}
+.progress{margin-top:10px;font-size:13px;color:var(--muted);display:flex;justify-content:space-between}
+.progress b{color:var(--text)}
+.pbar{height:6px;background:#f2eadc;border-radius:99px;overflow:hidden;margin-top:6px}
+.pbar i{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
+.rowstate{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:#f5efe4;color:var(--muted)}
+.rowstate.done{background:var(--greenbg);color:var(--green)}
+
+.group{margin-bottom:14px}
+.group>label{display:block;font-weight:700;margin-bottom:7px;font-size:13.5px}
+.chips{display:flex;flex-direction:column;gap:6px}
+.chip{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:start;border:1px solid var(--line);background:#fff;
+  border-radius:9px;padding:9px 11px;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;transition:.12s;direction:ltr}
+.chip:hover{border-color:#dccfbb;background:#fffcf5}
+.chip[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellowd);box-shadow:0 2px 0 var(--yellowd)}
+.chip[data-tone="good"][aria-pressed="true"]{background:var(--greenbg);border-color:var(--green);box-shadow:0 2px 0 var(--green);color:var(--green)}
+.chip[data-tone="bad"][aria-pressed="true"]{background:var(--redbg);border-color:var(--red);box-shadow:0 2px 0 var(--red);color:var(--red)}
+textarea{width:100%;height:96px;resize:vertical;background:#fff;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:10px;font:14px/1.5 inherit;font-family:inherit}
+textarea:focus,.setup input:focus,.jump input:focus{outline:2px solid var(--yellow);outline-offset:-1px}
+.nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+.nav .wide{grid-column:1/-1}
+.jump{display:flex;gap:6px;margin-top:12px}
+.jump input{flex:1;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:999px;font:13px Consolas,monospace;direction:ltr}
+.keys{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:12px;color:var(--muted);line-height:2}
+
+/* الصور */
+.ai{display:flex;gap:12px;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:14px;font-size:14px}
+.ai .tag{flex:none;font-weight:700;font-size:13px;padding:4px 10px;border-radius:99px;background:#f5efe4;direction:ltr}
+.ai .tag.good{background:var(--greenbg);color:var(--green)}
+.ai .tag.bad{background:var(--redbg);color:var(--red)}
+.ai p{margin:2px 0 0;color:var(--muted);direction:ltr;text-align:left;flex:1;line-height:1.5}
+.images{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 1px 2px rgba(74,38,23,.04);min-width:0}
+.card.pick{border-color:var(--green);box-shadow:0 0 0 2px var(--greenbg)}
+.card h4{margin:0 0 10px;font-size:14px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.card h4::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--yellow)}
+.card h4 .badge{margin-inline-start:auto;font-size:11px;color:var(--green);background:var(--greenbg);padding:2px 8px;border-radius:99px}
+.frame{display:block;border-radius:8px;border:1px solid #f0e9df;background:#faf7f2;min-height:160px;cursor:zoom-in;overflow:hidden;position:relative}
+.frame:hover{border-color:var(--yellowd)}
+.frame img{display:block;width:100%;height:auto}
+.frame .msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#a99c92;font-size:13px;padding:10px;text-align:center}
+.meta{display:flex;justify-content:space-between;margin-top:7px;font-size:11px;color:#a99c92}
+.meta span:last-child{font-family:Consolas,monospace;direction:ltr}
+
+/* إشعارات */
+.toasts{position:fixed;bottom:16px;left:16px;display:flex;flex-direction:column;gap:8px;z-index:50;max-width:380px}
+.toast{background:#3b2417;color:#fff;padding:10px 14px;border-radius:10px;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.18);animation:in .2s}
+.toast.bad{background:var(--red)}
+.toast.good{background:var(--green)}
+@keyframes in{from{transform:translateY(8px);opacity:0}}
+
+@media(max-width:1180px){.images{grid-template-columns:1fr 1fr}}
+@media(max-width:860px){
+  .top{position:static}
+  .eval{grid-template-columns:1fr}
+  .form{position:static;max-height:none}
+  .images{grid-template-columns:1fr}
+  .keys{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="top" id="top">
+  <div class="bar">
+    <div class="brand"><b>أداة تدقيق الصور</b><span id="sheetTitle">Local Shop Tools</span></div>
+    <div class="spacer"></div>
+    <div class="status" id="status">غير متصل</div>
+    <button class="btn icon" id="btnRefresh" title="تحديث البيانات من الشيت" disabled>⟳ تحديث</button>
+    <button class="btn icon" id="btnSettings" title="إعدادات الاتصال">⚙</button>
+  </div>
+  <nav class="tabs" id="tabs" role="tablist"></nav>
+</header>
+
+<main class="stage">
+  <div id="warn" class="warn hidden"></div>
+  <div id="err" class="err hidden"></div>
+
+  <section class="setup hidden" id="setup">
+    <h2>الاتصال بقوقل شيت</h2>
+    <p>الصق رابط الـ Web App وكلمة السر اللي أعطاك إياها المشرف. تنحفظ في هذا المتصفح فقط، وما تحتاج تدخلها مرة ثانية.</p>
+    <label for="inUrl">رابط الـ Web App (ينتهي بـ /exec)</label>
+    <input id="inUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
+    <label for="inKey">كلمة السر (API_KEY)</label>
+    <input id="inKey" autocomplete="off">
+    <div class="row">
+      <button class="btn primary" id="btnConnect">اتصال</button>
+      <button class="btn hidden" id="btnCancelSetup">إلغاء</button>
+    </div>
+  </section>
+
+  <div class="notice hidden" id="loading"><h2>جاري التحميل…</h2><p>نجلب البيانات من قوقل شيت</p></div>
+  <div class="notice hidden" id="pick"><h2>اختر اسمك من الأعلى</h2><p>بتظهر لك المنتجات المسندة لك فقط. التقييم ينحفظ تلقائياً في الشيت، ما في زر حفظ.</p></div>
+
+  <div class="eval hidden" id="eval">
+    <aside class="form" id="form">
+      <div class="head">
+        <h3><span id="lblAgent"></span><span class="rowstate" id="rowState"></span></h3>
+        <div class="code"><button id="btnCopy" title="نسخ الكود">نسخ</button><span id="lblCode"></span></div>
+        <div class="progress"><span>المنتج <b id="lblPos">0</b> من <b id="lblTotal">0</b></span><span>تم تقييم <b id="lblDone">0</b></span></div>
+        <div class="pbar"><i id="pbar"></i></div>
+      </div>
+
+      <div class="group"><label>القرار (Verdict)</label><div class="chips" id="verdicts"></div></div>
+      <div class="group"><label>التفاصيل (Info)</label><div class="chips" id="infos"></div></div>
+      <div class="group">
+        <label for="txtComments">الملاحظات</label>
+        <textarea id="txtComments" dir="auto" placeholder="اكتب ملاحظتك… تنحفظ بعد ما توقف الكتابة بثانية"></textarea>
+      </div>
+
+      <div class="nav">
+        <button class="btn" id="btnPrev">→ السابق</button>
+        <button class="btn" id="btnNext">التالي ←</button>
+        <button class="btn primary wide" id="btnNextTodo">التالي غير المُقيَّم</button>
+      </div>
+      <form class="jump" id="jump">
+        <input id="inJump" placeholder="رقم أو كود المنتج">
+        <button class="btn" type="submit">انتقال</button>
+      </form>
+      <div class="keys" id="keys"></div>
+    </aside>
+
+    <section>
+      <div class="ai hidden" id="ai"><span class="tag" id="aiTag"></span><p id="aiText"></p></div>
+      <div class="images">
+        <div class="card" data-img="old"><h4>الصورة القديمة (Old)</h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span>اضغط لفتحها بكامل الدقة</span><span></span></div></div>
+        <div class="card" data-img="claude"><h4>صورة كلود (Claude)</h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span>اضغط لفتحها بكامل الدقة</span><span></span></div></div>
+        <div class="card" data-img="gemini"><h4>صورة جيمني (Gemini)</h4><a class="frame" target="_blank" rel="noopener"><img alt=""><span class="msg"></span></a><div class="meta"><span>اضغط لفتحها بكامل الدقة</span><span></span></div></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* ============ إعداد المشرف: حط الرابط وكلمة السر هنا قبل ما توزع الملف ============
+   لو تركتها فاضية، الأداة تطلبها من الموظف أول مرة وتحفظها في متصفحه. */
+const API_URL = "";
+const API_KEY = "";
+/* ================================================================================= */
+
+const ROLE_AR = { content: "محتوى", quality: "جودة" };
+const TEXT_DELAY = 1000;           // الحفظ بعد التوقف عن الكتابة
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem("audit." + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("audit." + k, JSON.stringify(v)); } catch {} },
+};
+
+const $ = (id) => document.getElementById(id);
+const cfg = { url: API_URL || LS.get("url", ""), key: API_KEY || LS.get("key", "") };
+let agents = [], options = {}, cur = null, tasks = [], idx = 0;
+
+/* ---------------- الاتصال ---------------- */
+async function api(params) {
+  const q = new URLSearchParams({ ...params, key: cfg.key, t: Date.now() });
+  return parse(await fetch(cfg.url + "?" + q, { redirect: "follow" }));
+}
+async function apiPost(body) {
+  // نص عادي (text/plain) عشان المتصفح ما يرسل طلب CORS مسبق يرفضه Apps Script
+  return parse(await fetch(cfg.url, { method: "POST", body: JSON.stringify({ ...body, key: cfg.key }), redirect: "follow" }));
+}
+async function parse(res) {
+  const text = await res.text();
+  let data;
+  try { data = JSON.parse(text); } catch {
+    throw new Error(/<html|<!doctype/i.test(text)
+      ? "الرابط رجّع صفحة بدل البيانات. تأكد إن النشر على Who has access: Anyone وإن الرابط ينتهي بـ /exec"
+      : "رد غير مفهوم من الشيت (" + res.status + ")");
+  }
+  if (!data.ok) throw new Error(data.error || "خطأ غير معروف");
+  return data;
+}
+
+/* ---------------- الحفظ التلقائي ---------------- */
+// كل تعديل ينضاف لطابور. الطابور ينحفظ في المتصفح كمان، فلو انقطع النت أو انسكّرت الصفحة ما يضيع شي.
+const pending = new Map(LS.get("pending", []));
+let inFlight = null, flushTimer = 0, retryDelay = 0, lastSaved = null, saveError = "";
+
+const pkey = (role, agent, row) => role + "|" + agent + "|" + row;
+function persist() {
+  const all = new Map(pending);
+  if (inFlight) for (const u of inFlight) if (!all.has(u.id)) all.set(u.id, u);
+  LS.set("pending", [...all]);
+}
+
+function setField(t, field, value, delay) {
+  if (!t || t[field] === value) return;
+  t[field] = value;
+  const id = pkey(cur.role, cur.agent, t.row);
+  const u = pending.get(id) || { id, row: t.row, code: t.code, agent: cur.agent, role: cur.role, fields: {} };
+  u.fields[field] = value;
+  pending.set(id, u);
+  persist();
+  renderProgress();
+  schedule(delay);
+}
+
+function schedule(delay) {
+  clearTimeout(flushTimer);
+  flushTimer = setTimeout(flush, delay);
+  renderStatus();
+}
+
+async function flush() {
+  clearTimeout(flushTimer);
+  if (inFlight || !pending.size || !cfg.url) return renderStatus();
+  inFlight = [...pending.values()];
+  pending.clear();
+  renderStatus();
+  try {
+    const res = await apiPost({ action: "save", updates: inFlight });
+    for (const r of res.results) if (!r.ok) toast(r.error, "bad");
+    lastSaved = new Date(); saveError = ""; retryDelay = 0;
+  } catch (e) {
+    // رجّع اللي فشل للطابور، والتعديلات الأحدث تغلب
+    for (const u of inFlight) {
+      const newer = pending.get(u.id);
+      pending.set(u.id, newer ? { ...u, fields: { ...u.fields, ...newer.fields } } : u);
+    }
+    saveError = e.message;
+    retryDelay = Math.min(retryDelay ? retryDelay * 2 : 2000, 30000);
+  }
+  inFlight = null;
+  persist();
+  if (pending.size) schedule(retryDelay || 300); else renderStatus();
+}
+
+function renderStatus() {
+  const el = $("status");
+  const waiting = pending.size + (inFlight ? inFlight.length : 0);
+  if (saveError && pending.size) {
+    el.className = "status error";
+    el.textContent = (navigator.onLine ? "تعذر الحفظ، نعيد المحاولة…" : "لا يوجد إنترنت، بنحفظ أول ما يرجع") + " (" + waiting + ")";
+    el.title = saveError;
+  } else if (waiting) {
+    el.className = "status saving"; el.textContent = "جاري الحفظ…"; el.title = "";
+  } else if (lastSaved) {
+    el.className = "status saved"; el.textContent = "تم الحفظ تلقائياً " + lastSaved.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" }); el.title = "";
+  } else if (cur) {
+    el.className = "status saved"; el.textContent = "متصل"; el.title = "";
+  }
+}
+
+window.addEventListener("online", () => { retryDelay = 0; flush(); });
+window.addEventListener("beforeunload", (e) => {
+  commitText();
+  if (!pending.size && !inFlight) return;
+  if (pending.size && cfg.url && navigator.sendBeacon) {
+    navigator.sendBeacon(cfg.url, new Blob([JSON.stringify({ action: "save", key: cfg.key, updates: [...pending.values()] })], { type: "text/plain" }));
+  }
+  e.preventDefault(); e.returnValue = "";
+});
+
+/* ---------------- تحميل البيانات ---------------- */
+async function start() {
+  show("loading");
+  hideErr();
+  try {
+    const data = await api({ action: "init" });
+    agents = data.agents; options = data.options;
+    $("sheetTitle").textContent = data.title;
+    $("btnRefresh").disabled = false;
+    const w = $("warn");
+    w.classList.toggle("hidden", !data.missing.length);
+    w.textContent = data.missing.length ? "تنبيه للمشرف: هذه الأعمدة غير موجودة في الشيت: " + data.missing.join("، ") + ". شغّل الدالة setup في Apps Script." : "";
+    renderTabs();
+    renderStatus();
+    flush(); // أي تعديلات بقيت من آخر مرة
+    const last = LS.get("agent", null);
+    const a = last && agents.find((x) => x.name === last.name && x.role === last.role);
+    if (a) await openAgent(a); else show(agents.length ? "pick" : null);
+    if (!agents.length) showErr("ما في أسماء موظفين في أعمدة Content Agent / Quality Agent.");
+  } catch (e) {
+    show(null);
+    showErr("ما قدرنا نتصل بالشيت:\n" + e.message);
+    if (!API_URL) openSetup(true);
+  }
+}
+
+function renderTabs() {
+  const box = $("tabs");
+  box.innerHTML = "";
+  for (const a of agents) {
+    const b = document.createElement("button");
+    b.className = "tab" + (a.done >= a.total ? " complete" : "");
+    b.setAttribute("role", "tab");
+    b.setAttribute("aria-selected", String(!!cur && cur.name === a.name && cur.role === a.role));
+    b.append(a.name);
+    const role = document.createElement("small"); role.textContent = ROLE_AR[a.role];
+    const count = document.createElement("span"); count.className = "count"; count.textContent = a.done + "/" + a.total;
+    b.append(role, count);
+    b.onclick = () => openAgent(a);
+    box.append(b);
+  }
+}
+
+async function openAgent(a, keepRow) {
+  commitText();
+  textOwner = null;
+  await flushNow();
+  cur = { name: a.name, agent: a.name, role: a.role };
+  LS.set("agent", { name: a.name, role: a.role });
+  renderTabs();
+  if (!keepRow) show("loading");
+  try {
+    const data = await api({ action: "tasks", agent: a.name, role: a.role });
+    tasks = data.tasks;
+    // التعديلات اللي لسه ما وصلت الشيت تغلب على اللي رجع منه
+    for (const u of pending.values()) {
+      if (u.role !== cur.role || u.agent !== cur.agent) continue;
+      const t = tasks.find((x) => x.row === u.row && x.code === u.code);
+      if (t) Object.assign(t, u.fields);
+    }
+  } catch (e) {
+    showErr("ما قدرنا نجيب المنتجات:\n" + e.message);
+    return show(null);
+  }
+  if (!tasks.length) { show("pick"); return toast("ما في منتجات مسندة لـ " + a.name); }
+  const row = keepRow || LS.get("pos." + a.role + "|" + a.name, 0);
+  let i = tasks.findIndex((t) => t.row === row);
+  if (i < 0) i = Math.max(tasks.findIndex((t) => !isDone(t.verdict)), 0);
+  options.cur = options[a.role];
+  buildChips();
+  show("eval");
+  go(i);
+}
+
+async function flushNow() {
+  if (pending.size) await flush();
+  for (let n = 0; inFlight && n < 100; n++) await new Promise((r) => setTimeout(r, 100));
+}
+
+/* ---------------- العرض ---------------- */
+function isDone(v) { const s = String(v || "").trim().toLowerCase(); return s !== "" && s !== "new"; }
+function tone(v) { const s = v.toLowerCase(); return /approved|correct|okay/.test(s) && !/none/.test(s) ? "good" : /fix|none|reject/.test(s) ? "bad" : ""; }
+
+function buildChips() {
+  let n = 1;
+  const make = (box, list, field) => {
+    box.innerHTML = "";
+    for (const v of list) {
+      const b = document.createElement("button");
+      b.className = "chip"; b.type = "button"; b.dataset.value = v; b.dataset.tone = tone(v);
+      const k = n <= 9 ? String(n++) : "";
+      b.dataset.key = k;
+      const label = document.createElement("span"); label.textContent = v.trim();
+      b.append(label);
+      if (k) { const kb = document.createElement("kbd"); kb.textContent = k; b.append(kb); }
+      b.onclick = () => pickChip(field, v, true);
+      box.append(b);
+    }
+  };
+  make($("verdicts"), options.cur.verdict, "verdict");
+  make($("infos"), options.cur.info, "info");
+  $("keys").innerHTML = "اختصارات: <kbd>1</kbd>–<kbd>" + (n - 1) + "</kbd> اختيار &nbsp; <kbd>←</kbd> التالي &nbsp; <kbd>→</kbd> السابق<br><kbd>N</kbd> التالي غير المُقيَّم &nbsp; <kbd>C</kbd> الملاحظات &nbsp; <kbd>Esc</kbd> خروج من الكتابة";
+}
+
+function pickChip(field, v, toggle) {
+  const t = tasks[idx];
+  setField(t, field, toggle && t[field] === v ? "" : v, 0); // الضغط بالماوس مرة ثانية يلغي الاختيار
+  renderChips();
+}
+
+function renderChips() {
+  const t = tasks[idx];
+  for (const [box, field] of [[$("verdicts"), "verdict"], [$("infos"), "info"]]) {
+    for (const b of box.children) b.setAttribute("aria-pressed", String(b.dataset.value === t[field]));
+  }
+}
+
+function go(i) {
+  if (!tasks.length) return;
+  commitText();
+  idx = Math.max(0, Math.min(i, tasks.length - 1));
+  const t = tasks[idx];
+  LS.set("pos." + cur.role + "|" + cur.agent, t.row);
+
+  $("lblAgent").textContent = cur.agent + " · " + ROLE_AR[cur.role];
+  $("lblCode").textContent = t.code || "—";
+  $("txtComments").value = t.comments;
+  textOwner = t;
+  renderChips();
+  renderProgress();
+  $("btnPrev").disabled = idx === 0;
+  $("btnNext").disabled = idx === tasks.length - 1;
+
+  // قرار الفرز الآلي (Cloud Decision) وتعليق كلود
+  const ai = t.aiDecision.trim();
+  $("ai").classList.toggle("hidden", !ai && !t.aiComment.trim());
+  $("aiTag").textContent = ai || "بدون قرار آلي";
+  $("aiTag").className = "tag " + (/approved/i.test(ai) ? "good" : /reject/i.test(ai) ? "bad" : "");
+  $("aiText").textContent = t.aiComment;
+  const pick = /claude/i.test(ai) ? "claude" : /gemini/i.test(ai) ? "gemini" : /original/i.test(ai) ? "old" : "";
+
+  for (const card of document.querySelectorAll(".card")) {
+    const k = card.dataset.img;
+    setImage(card, t[k]);
+    card.classList.toggle("pick", k === pick);
+    let badge = card.querySelector(".badge");
+    if (k === pick && !badge) { badge = document.createElement("span"); badge.className = "badge"; badge.textContent = "اختيار الفرز الآلي"; card.querySelector("h4").append(badge); }
+    if (k !== pick && badge) badge.remove();
+  }
+  preload(idx + 1); preload(idx + 2);
+}
+
+function setImage(card, url) {
+  const a = card.querySelector("a"), img = card.querySelector("img"), msg = card.querySelector(".msg"), size = card.querySelector(".meta span:last-child");
+  size.textContent = "";
+  img.onload = img.onerror = null;
+  if (!url) { a.removeAttribute("href"); img.removeAttribute("src"); img.style.display = "none"; msg.textContent = "لا يوجد رابط"; return; }
+  a.href = url;
+  msg.textContent = "جاري التحميل…";
+  img.style.display = "";
+  img.onload = () => { msg.textContent = ""; size.textContent = img.naturalWidth + "×" + img.naturalHeight; };
+  img.onerror = () => { img.style.display = "none"; msg.textContent = "تعذر تحميل الصورة — اضغط لفتح الرابط"; };
+  img.src = url;
+}
+
+function preload(i) {
+  const t = tasks[i];
+  if (t) for (const u of [t.old, t.claude, t.gemini]) if (u) new Image().src = u;
+}
+
+function renderProgress() {
+  const t = tasks[idx];
+  const done = tasks.filter((x) => isDone(x.verdict)).length;
+  $("lblPos").textContent = idx + 1;
+  $("lblTotal").textContent = tasks.length;
+  $("lblDone").textContent = done;
+  $("pbar").style.width = (tasks.length ? (done / tasks.length) * 100 : 0) + "%";
+  const st = $("rowState");
+  st.textContent = isDone(t.verdict) ? "مُقيَّم" : "لم يُقيَّم";
+  st.className = "rowstate" + (isDone(t.verdict) ? " done" : "");
+  const a = agents.find((x) => x.name === cur.agent && x.role === cur.role);
+  if (a && a.done !== done) { a.done = done; renderTabs(); }
+}
+
+function nextTodo() {
+  commitText();
+  for (let k = 1; k <= tasks.length; k++) {
+    const j = (idx + k) % tasks.length;
+    if (!isDone(tasks[j].verdict)) return go(j);
+  }
+  toast("أحسنت! قيّمت كل المنتجات المسندة لك 🎉", "good");
+}
+
+/* الملاحظات: تنحفظ بعد ثانية من آخر حرف، أو فوراً لما تطلع من الخانة أو تنتقل.
+   textOwner = المنتج اللي ملاحظته معروضة الحين في الخانة */
+let textOwner = null;
+function commitText(delay = 0) {
+  if (textOwner) setField(textOwner, "comments", $("txtComments").value, delay);
+}
+$("txtComments").addEventListener("input", () => commitText(TEXT_DELAY));
+$("txtComments").addEventListener("blur", () => commitText(0));
+
+/* ---------------- الأزرار ---------------- */
+$("btnPrev").onclick = () => go(idx - 1);
+$("btnNext").onclick = () => { if (idx === tasks.length - 1) toast("هذا آخر منتج"); else go(idx + 1); };
+$("btnNextTodo").onclick = nextTodo;
+$("btnCopy").onclick = () => { navigator.clipboard?.writeText(tasks[idx].code).then(() => toast("تم نسخ الكود")); };
+$("jump").onsubmit = (e) => {
+  e.preventDefault();
+  const v = $("inJump").value.trim();
+  if (!v) return;
+  let i = tasks.findIndex((t) => t.code.trim() === v);
+  if (i < 0 && /^\d+$/.test(v) && v.length < 6) i = Number(v) - 1;
+  if (i < 0 || i >= tasks.length) return toast("ما لقينا المنتج عندك", "bad");
+  $("inJump").value = "";
+  go(i);
+};
+$("btnRefresh").onclick = async () => {
+  await flushNow();
+  const keep = cur && tasks[idx] ? { a: cur, row: tasks[idx].row } : null;
+  try {
+    const data = await api({ action: "init" });
+    agents = data.agents; options = data.options;
+    const a = keep && agents.find((x) => x.name === keep.a.agent && x.role === keep.a.role);
+    if (a) await openAgent(a, keep.row); else { cur = null; renderTabs(); show("pick"); }
+    toast("تم التحديث من الشيت");
+  } catch (e) { toast(e.message, "bad"); }
+};
+
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const typing = /^(TEXTAREA|INPUT)$/.test(document.activeElement.tagName);
+  if (typing) { if (e.key === "Escape") document.activeElement.blur(); return; }
+  if ($("eval").classList.contains("hidden")) return;
+  const chip = document.querySelector('.chip[data-key="' + e.key + '"]');
+  if (chip) { e.preventDefault(); return pickChip(chip.parentElement.id === "verdicts" ? "verdict" : "info", chip.dataset.value, false); }
+  if (e.key === "ArrowLeft") { e.preventDefault(); $("btnNext").click(); }
+  else if (e.key === "ArrowRight") { e.preventDefault(); if (idx > 0) go(idx - 1); }
+  else if (e.key.toLowerCase() === "n") { e.preventDefault(); nextTodo(); }
+  else if (e.key.toLowerCase() === "c") { e.preventDefault(); $("txtComments").focus(); }
+});
+
+/* ---------------- الإعدادات ---------------- */
+function openSetup(required) {
+  $("inUrl").value = cfg.url; $("inKey").value = cfg.key;
+  $("btnCancelSetup").classList.toggle("hidden", !!required);
+  $("setup").classList.remove("hidden");
+  for (const id of ["loading", "pick", "eval"]) $(id).classList.add("hidden");
+}
+$("btnSettings").onclick = () => openSetup(!cfg.url);
+$("btnCancelSetup").onclick = () => { $("setup").classList.add("hidden"); show(cur ? "eval" : "pick"); };
+$("btnConnect").onclick = () => {
+  const url = $("inUrl").value.trim(), key = $("inKey").value.trim();
+  if (!/^https:\/\/script\.google(usercontent)?\.com\/.+\/exec/.test(url)) return toast("الرابط لازم يكون رابط Web App وينتهي بـ /exec", "bad");
+  cfg.url = url; cfg.key = key;
+  LS.set("url", url); LS.set("key", key);
+  $("setup").classList.add("hidden");
+  start();
+};
+
+/* ---------------- أدوات ---------------- */
+function show(id) { for (const x of ["loading", "pick", "eval"]) $(x).classList.toggle("hidden", x !== id); stick(); }
+function showErr(m) { $("err").textContent = m; $("err").classList.remove("hidden"); }
+function hideErr() { $("err").classList.add("hidden"); }
+function toast(m, kind) {
+  const t = document.createElement("div");
+  t.className = "toast " + (kind || ""); t.textContent = m;
+  $("toasts").append(t);
+  setTimeout(() => t.remove(), kind === "bad" ? 6000 : 2500);
+}
+function stick() { document.documentElement.style.setProperty("--stick", $("top").offsetHeight + 14 + "px"); }
+window.addEventListener("resize", stick);
+
+if (cfg.url) start(); else openSetup(true);
+</script>
+</body>
+</html>
