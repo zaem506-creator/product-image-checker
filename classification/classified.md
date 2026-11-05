@@ -15,11 +15,11 @@
 | Clikon 2000W Electric Kettle 4.2L | Kitchen Tools & Utensils |
 | Panasonic 1000W De-Luxe Temperature Setting Automatic Iron White and Gold NI-22AWTXJTB *(15066) 2.68Kg | Laundry & Clothing Care |
 | Philips Essentials Collection Philips Kettle 1000 Series Hot Water For Everyday Use Speedy Boiling For Hot Drinks And More1.7L 1Pieces | Kitchen Tools & Utensils |
-| Philips 1000 Series Airfryer 3.2L 1Piece | Kitchen Tools & Utensils |
+| Philips 1000 Series Airfryer 3.2L 1Piece | Cookware & Bakeware |
 | Gulfmaid Poly Styrene Spoon 50 Pieces | Disposables & Food Packaging |
 | Clikon Blue Vacuum Cleaner | Cleaning Tools & Accessories |
 | Clikon Vacuum Cleaner 1800 W Black 21L | Cleaning Tools & Accessories |
-| Koolen Black Electric Oven 45L | Kitchen Tools & Utensils |
+| Koolen Black Electric Oven 45L | Cookware & Bakeware |
 | Xb1042/10Philips 1000Series Bagless Vacuum Cleaner 1200W Powercyclone 3Multi Purpose Nozzle Furniture Nozzle 90Mm 1Piece | Cleaning Tools & Accessories |
 | Orinex  Air Fryer Square 30Pieces | Disposables & Food Packaging |
 | Orinex White Sandwich Paper 500Sheets | Disposables & Food Packaging |
@@ -659,18 +659,18 @@
 | Downy Floral Breeze Fabric Softener 3L | Laundry & Clothing Care |
 | Persil Easy High Foam Powder Detergent 4.5kg | Laundry & Clothing Care |
 | Huggies Extra Care Pants 4+ Years 84Pieces | Baby Care |
-| Dots White Toaster | Kitchen Tools & Utensils |
+| Dots White Toaster | Cookware & Bakeware |
 | Forhome Redon Rectangular Honeycomb Oven Tray 35X25Cm 1Piece | Cookware & Bakeware |
 | Home Master Stainless Steel Kettle 1500W 3.5L | Kitchen Tools & Utensils |
 | Water Dispenser Hot & Cold 580W 1Piece | Hardware & Household Essentials |
-| Forhome White Samosa & Pancake Machine | Kitchen Tools & Utensils |
+| Forhome White Samosa & Pancake Machine | Cookware & Bakeware |
 | Fourhome Air Fryer Paper Set 80 Pieces | Disposables & Food Packaging |
-| Clikon 2000W Infrared Electric Hob | Kitchen Tools & Utensils |
-| Colin White Multifunctional Electric Fryer 4L | Kitchen Tools & Utensils |
+| Clikon 2000W Infrared Electric Hob | Cookware & Bakeware |
+| Colin White Multifunctional Electric Fryer 4L | Cookware & Bakeware |
 | Forhome Redon Honeycomb Frying Pan With Glass Lid 26 X 7.0 Cm 1Piece | Cookware & Bakeware |
 | Typhoon Steam Iron 210ml | Laundry & Clothing Care |
 | Forhome Silver Aluminum Frying Pan 21X5 Cm 1Piece | Cookware & Bakeware |
-| Colin Yellow 2-Slice Toaster | Kitchen Tools & Utensils |
+| Colin Yellow 2-Slice Toaster | Cookware & Bakeware |
 | Forhome Redon Honeycomb Milk Pot 18X8.0 Cm 1Piece | Cookware & Bakeware |
 | Forhome Gold Stainless Steel Rice Ladle 23*7 Cm 1Piece | Kitchen Tools & Utensils |
 | Kenwood Blue Ceramic Steam Iron 2600W | Laundry & Clothing Care |
@@ -678,7 +678,7 @@
 | Nice Redon Honeycomb Pan 18X3.3Cm 1Piece | Cookware & Bakeware |
 | Forhome Acrylic Dates 1 Piece | Tableware & Serveware |
 | Forhome Redon Honeycomb Pot With Stainless Steel Lid 22 X 10.5 Cm 1Piece | Cookware & Bakeware |
-| Colin Red Electric Bread Maker 30cm | Kitchen Tools & Utensils |
+| Colin Red Electric Bread Maker 30cm | Cookware & Bakeware |
 | Ocarina Blue Steam Iron 2800W | Laundry & Clothing Care |
 | The Bedouin Masters Single Pot No. 20 1Piece | Cookware & Bakeware |
 | Nice Thermal Stainless Steel Mug With Built-In Straw Brown 800Ml | Drinkware & Mugs |
@@ -706,21 +706,21 @@
 | Forhome Redon Round Honeycomb Oven Tray 40X4.5Cm 1Piece | Cookware & Bakeware |
 | Neoflam Mint Korean Pot 20cm | Cookware & Bakeware |
 | Clikon Electric Glass Kettle 2200W 1.7L | Kitchen Tools & Utensils |
-| Home Master Sandwich Maker | Kitchen Tools & Utensils |
+| Home Master Sandwich Maker | Cookware & Bakeware |
 | Forhome Glass Teapot with Black Handle 1200ml | Tableware & Serveware |
 | Orenex Round Coated Charcoal 50 Tablets | Home Decor & Fragrances |
-| Colin Black Electric Stove | Kitchen Tools & Utensils |
+| Colin Black Electric Stove | Cookware & Bakeware |
 | Trust Two-Handed Brown Frying Pan 30cm | Cookware & Bakeware |
 | Forhome Gold Glass Teapot 1000ml | Tableware & Serveware |
 | Forhome Stainless Steel Gas Stove Silver Wooden Handle 600Ml | Cookware & Bakeware |
-| Dots White Electric Microwave 30L | Kitchen Tools & Utensils |
-| Home Master Electric Oven 1600W 38L | Kitchen Tools & Utensils |
+| Dots White Electric Microwave 30L | Cookware & Bakeware |
+| Home Master Electric Oven 1600W 38L | Cookware & Bakeware |
 | Nice Brown Paper Cups 60ml | Disposables & Food Packaging |
-| Dots Air Fryer 6.5L | Kitchen Tools & Utensils |
+| Dots Air Fryer 6.5L | Cookware & Bakeware |
 | Nice Thermal Stainless Steel Mug With Built-In Straw Gray 800Ml | Drinkware & Mugs |
 | Royal Steel Pot Size 13*22Cm 1Piece | Cookware & Bakeware |
 | Typhoon Electric Kettle Black Plastic 1500W 1.8L | Kitchen Tools & Utensils |
-| Colin White Manual Microwave 20L | Kitchen Tools & Utensils |
+| Colin White Manual Microwave 20L | Cookware & Bakeware |
 | Clikon Handheld Steam Iron | Laundry & Clothing Care |
 | Forhome Beige Granite Frying Pan 12cm | Cookware & Bakeware |
 | Forhome Silver Aluminum Frying Pan 23X5.5Cm 1Piece | Cookware & Bakeware |
@@ -736,7 +736,7 @@
 | Forhome Redon Honeycomb Frying Pan With Glass Lid 28 X 7.0 Cm 1Piece | Cookware & Bakeware |
 | Nice Gray Thermal Cup 1200ml | Drinkware & Mugs |
 | Nice Turkish Coffee Pot 1060ml | Cookware & Bakeware |
-| Typhoon 2000W Deep Fryer with Window 3L | Kitchen Tools & Utensils |
+| Typhoon 2000W Deep Fryer with Window 3L | Cookware & Bakeware |
 | Dessert Spoon Set 6Pieces | Tableware & Serveware |
 | Colin Black Standing Fan | Hardware & Household Essentials |
 | Braun Plastic Kettle 2200W 1.7L | Kitchen Tools & Utensils |
@@ -798,12 +798,12 @@
 | Colger Pink Water Bottle with Straw 32 Oz | Drinkware & Mugs |
 | Vanish White Stain Remover 495Ml | Laundry & Clothing Care |
 | Crezon Creation Home & Linen Fragrance 500Ml | Home Decor & Fragrances |
-| Typhoon 2000W Deep Fryer with Window 5L | Kitchen Tools & Utensils |
+| Typhoon 2000W Deep Fryer with Window 5L | Cookware & Bakeware |
 | Rocco Sharpener 1Piece | Desk Supplies & Organization |
 | Hello Food Storage Bags 60 Bags 30*45Cm 1Piece | Disposables & Food Packaging |
 | Lady Speed Stick Floral Antiperspirant 45g | Personal Grooming & Travel Kits |
 | Forhome Stainless Steel Meat Tenderizer | Kitchen Tools & Utensils |
-| Cross White Toaster Set 4 Pieces | Kitchen Tools & Utensils |
+| Cross White Toaster Set 4 Pieces | Cookware & Bakeware |
 | Nice Insulated Mug With Purple Side Handle 900Ml | Drinkware & Mugs |
 | Ikeac Transparent Pbt Bowl With Lid 31.5*7 1Piece | Food Containers |
 | Weekly Medication Schedule Organizer Rose 1Piece | Storage & Organizers |
@@ -1139,7 +1139,7 @@
 | Fourhome Round Air Fryer Paper Set 80 Pieces | Disposables & Food Packaging |
 | Anna Cotton Balls For Babies 100Pieces | Baby Care |
 | Dots Black Dry Iron | Laundry & Clothing Care |
-| Home Master 900W White Microwave Oven 30L | Kitchen Tools & Utensils |
+| Home Master 900W White Microwave Oven 30L | Cookware & Bakeware |
 | Zoom Dental Floss Sticks 50 Pieces | Personal Grooming & Travel Kits |
 | Lady Speed Stick Cool Aqua Antiperspirant 150ml | Personal Grooming & Travel Kits |
 | Kyon Hand Mixer Dough Mixer 300W 3.5L | Kitchen Tools & Utensils |
@@ -1166,7 +1166,7 @@
 | Forhome Yellow Aluminum Pitcher 1L | Tableware & Serveware |
 | Beige Tea & Coffee Flask Set 1 L + 1L | Drinkware & Mugs |
 | Waterproof Kitchen Apron Blue 1Piece | Kitchen Tools & Utensils |
-| Dots Black Electric Grill | Kitchen Tools & Utensils |
+| Dots Black Electric Grill | Cookware & Bakeware |
 | Colin 2000W Vertical Steam Iron 1.8L | Laundry & Clothing Care |
 | Nice Akes Multi-Purpose Storage Box 120 Bags | Disposables & Food Packaging |
 | Anchor High Tip Toothbrush 3 Pieces | Personal Grooming & Travel Kits |
@@ -1214,7 +1214,7 @@
 | Trust Brown Pot Size 26 | Cookware & Bakeware |
 | Fortews Sweet Home Pink Broom Toy | Action Figures & Dolls & Playsets |
 | Forhome Manual Charcoal Blower | Sports & Outdoor Activities |
-| Clikon Electric BBQ Grill | Kitchen Tools & Utensils |
+| Clikon Electric BBQ Grill | Cookware & Bakeware |
 | Zoom Beige Double Hot & Cold Paper Cups 8Oz | Disposables & Food Packaging |
 | Akc Piggy Bank Drawing Riyal 10×15Cm 1Piece | Storage & Organizers |
 | Nice Flask For Tea & Coffee Black 600Ml | Drinkware & Mugs |
@@ -1241,7 +1241,7 @@
 | Lifebuoy Complete Care Soap 3x70g | Bath & Body Wash Essentials |
 | Clorox Pine Scent Disinfectant Cleaner 5L | Cleaning Tools & Accessories |
 | Fortways Round Children'S Pool Sea Creatures 90S Blue 1Piece | Sports & Outdoor Activities |
-| Dots Black 1-Burner Hob | Kitchen Tools & Utensils |
+| Dots Black 1-Burner Hob | Cookware & Bakeware |
 | Dettol X3 Powerful Pine Floor Cleaner 900Ml | Cleaning Tools & Accessories |
 | Vanish Pink Stain Remover 495ml | Laundry & Clothing Care |
 | Maped Eyeliner Pen Blue 1Piece | Makeup & Beauty Accessories |
@@ -1273,7 +1273,7 @@
 | Dots Silver Stainless Steel Kettle 1.7L | Kitchen Tools & Utensils |
 | Home Master Electric Onion Chopper 200g | Kitchen Tools & Utensils |
 | Fortwizz Blue Kids Scooter with Light-Up Wheels | Sports & Outdoor Activities |
-| Home Master Mini Pancake Maker 4-Eye 1500W 1Piece | Kitchen Tools & Utensils |
+| Home Master Mini Pancake Maker 4-Eye 1500W 1Piece | Cookware & Bakeware |
 | Sanita Servio Roll 200M 1Pieces | Disposables & Food Packaging |
 | Turkish Flat Round Plates 26.50Cm 1Pieces | Tableware & Serveware |
 | Cinderella Max Purple Wings Cotton 30 Pieces | Personal Grooming & Travel Kits |
@@ -1292,16 +1292,16 @@
 | Nice Stainless Steel Nail Clipper 39.5g | Personal Grooming & Travel Kits |
 | Fortoys Yellow School Bus Toy 1Pieces | Toy Vehicles & RC Toys |
 | Persil Blue Washing Powder 1L | Laundry & Clothing Care |
-| Clikon Airchef Digital 1500W 5L | Kitchen Tools & Utensils |
+| Clikon Airchef Digital 1500W 5L | Cookware & Bakeware |
 | Arion Fresco Frankincense Car Air Freshener | Home Decor & Fragrances |
 | Forhome Silver Aluminum Cookware Set 10 Pieces | Cookware & Bakeware |
-| Home Master Steel Toast Heater Black 2 Pieces | Kitchen Tools & Utensils |
+| Home Master Steel Toast Heater Black 2 Pieces | Cookware & Bakeware |
 | Pilot Navy Blue Pen 0.7Ml | Pens & Pencils & Writing |
 | Pilot V7 Red Liquid Pen | Pens & Pencils & Writing |
 | Fighter Flash Original Cleanser 3x946Ml | Cleaning Tools & Accessories |
 | Himalaya Gentle Baby Cleansing Wipes 48 Pieces | Baby Care |
 | Fourtoys Mini Happy Playmate Cooler | Action Figures & Dolls & Playsets |
-| Colin Silver Electric Oven 7.9kg | Kitchen Tools & Utensils |
+| Colin Silver Electric Oven 7.9kg | Cookware & Bakeware |
 | Anna Toothbrush Care Soft Bristles 3 Pieces | Personal Grooming & Travel Kits |
 | Forhome Redon Honeycomb Pot With Stainless Steel Lid 28×14.0Cm 1Pieces | Cookware & Bakeware |
 | Sano Black Stick Vacuum Cleaner | Cleaning Tools & Accessories |
